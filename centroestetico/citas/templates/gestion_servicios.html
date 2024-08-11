@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Servicios</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2 class="mb-4">Gestión de Servicios</h2>
+
+      <button id="nuevoServicioBtn" class="btn btn-primary mb-3">
+        Nuevo Servicio
+      </button>
+
+      <!-- Formulario de Servicio (inicialmente oculto) -->
+      <form id="servicioForm" class="mb-5" style="display: none">
+        <input type="hidden" id="servicioId" />
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre</label>
+          <input type="text" class="form-control" id="nombre" required />
+        </div>
+        <div class="mb-3">
+          <label for="descripcion" class="form-label">Descripción</label>
+          <textarea class="form-control" id="descripcion" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="precio" class="form-label">Precio</label>
+          <input
+            type="number"
+            step="0.01"
+            class="form-control"
+            id="precio"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="duracion" class="form-label">Duración (minutos)</label>
+          <input type="number" class="form-control" id="duracion" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Servicio</button>
+        <button type="button" id="cancelarBtn" class="btn btn-secondary">
+          Cancelar
+        </button>
+      </form>
+
+      <!-- Tabla de Servicios -->
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Duración</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="serviciosTableBody">
+          {% for servicio in servicios %}
+          <tr>
+            <td>{{ servicio.nombre }}</td>
+            <td>{{ servicio.descripcion }}</td>
+            <td>{{ servicio.precio }}</td>
+            <td>{{ servicio.duracion }} minutos</td>
+            <td>
+              <button
+                class="btn btn-sm btn-warning editar-servicio"
+                data-id="{{ servicio.id }}"
+              >
+                Editar
+              </button>
+              <button
+                class="btn btn-sm btn-danger eliminar-servicio"
+                data-id="{{ servicio.id }}"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Cuando el documento esté completamente cargado y listo
+
+        // Muestra el formulario de servicio al hacer clic en el botón "Nuevo Servicio"
+        $("#nuevoServicioBtn").click(function () {
+          $("#servicioForm").show(); // Muestra el formulario
+          $("#servicioId").val(""); // Limpia el campo de ID del formulario
+          $("#servicioForm")[0].reset(); // Resetea todos los campos del formulario a sus valores iniciales
+        });
+
+        // Oculta el formulario de servicio al hacer clic en el botón "Cancelar"
+        $("#cancelarBtn").click(function () {
+          $("#servicioForm").hide(); // Oculta el formulario
+        });
+
+        // Maneja el envío del formulario de servicio
+        $("#servicioForm").on("submit", function (e) {
+          e.preventDefault(); // Previene el comportamiento por defecto de envío del formulario
+
+          // Crea un objeto con los datos del formulario
+          var servicioData = {
+            id: $("#servicioId").val(),
+            nombre: $("#nombre").val(),
+            descripcion: $("#descripcion").val(),
+            precio: $("#precio").val(),
+            duracion: $("#duracion").val(),
+          };
+
+          // Realiza una solicitud AJAX para crear o actualizar el servicio
+          $.ajax({
+            url: "/crear_actualizar_servicio/", // URL para enviar la solicitud
+            type: "POST", // Tipo de solicitud HTTP
+            contentType: "application/json", // Tipo de contenido de la solicitud
+            data: JSON.stringify(servicioData), // Convierte los datos del formulario a formato JSON
+            success: function (response) {
+              // Maneja la respuesta de la solicitud
+              if (response.status === "success") {
+                alert(response.message); // Muestra un mensaje de éxito
+                location.reload(); // Recarga la página para actualizar la lista de servicios
+              } else {
+                alert("Error: " + response.message); // Muestra un mensaje de error
+              }
+            },
+          });
+        });
+
+        // Maneja el clic en los botones de edición de servicios
+        $(".editar-servicio").on("click", function () {
+          var servicioId = $(this).data("id"); // Obtiene el ID del servicio desde el atributo data-id
+          var row = $(this).closest("tr"); // Encuentra la fila más cercana a la que se hizo clic
+          $("#servicioId").val(servicioId); // Establece el ID del servicio en el formulario
+          $("#nombre").val(row.find("td:eq(0)").text()); // Llena el campo de nombre con el valor de la primera celda de la fila
+          $("#descripcion").val(row.find("td:eq(1)").text()); // Llena el campo de descripción con el valor de la segunda celda de la fila
+          $("#precio").val(row.find("td:eq(2)").text()); // Llena el campo de precio con el valor de la tercera celda de la fila
+          $("#duracion").val(row.find("td:eq(3)").text().split(" ")[0]); // Llena el campo de duración con el valor de la cuarta celda de la fila (asumiendo que el texto puede tener un espacio adicional)
+          $("#servicioForm").show(); // Muestra el formulario
+        });
+
+        // Maneja el clic en los botones de eliminación de servicios
+        $(".eliminar-servicio").on("click", function () {
+          var servicioId = $(this).data("id"); // Obtiene el ID del servicio desde el atributo data-id
+          if (confirm("¿Está seguro de que desea eliminar este servicio?")) {
+            // Solicita confirmación del usuario
+            // Realiza una solicitud AJAX para eliminar el servicio
+            $.ajax({
+              url: "/eliminar_servicio/", // URL para enviar la solicitud
+              type: "POST", // Tipo de solicitud HTTP
+              contentType: "application/json", // Tipo de contenido de la solicitud
+              data: JSON.stringify({ id: servicioId }), // Envía el ID del servicio como JSON
+              success: function (response) {
+                // Maneja la respuesta de la solicitud
+                if (response.status === "success") {
+                  alert(response.message); // Muestra un mensaje de éxito
+                  location.reload(); // Recarga la página para actualizar la lista de servicios
+                } else {
+                  alert("Error: " + response.message); // Muestra un mensaje de error
+                }
+              },
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

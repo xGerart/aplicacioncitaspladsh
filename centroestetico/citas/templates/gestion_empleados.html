@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Empleados</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2 class="mb-4">Gestión de Empleados</h2>
+
+      <button id="nuevoEmpleadoBtn" class="btn btn-primary mb-3">
+        Nuevo Empleado
+      </button>
+
+      <!-- Formulario de Empleado (inicialmente oculto) -->
+      <form id="empleadoForm" class="mb-5" style="display: none">
+        <input type="hidden" id="empleadoId" />
+        <div class="mb-3">
+          <label for="cedula" class="form-label">Cédula</label>
+          <input type="text" class="form-control" id="cedula" required />
+        </div>
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre</label>
+          <input type="text" class="form-control" id="nombre" required />
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" required />
+        </div>
+        <div class="mb-3">
+          <label for="celular" class="form-label">Celular</label>
+          <input type="tel" class="form-control" id="celular" required />
+        </div>
+        <div class="mb-3">
+          <label for="servicios" class="form-label">Servicios</label>
+          <select multiple class="form-control" id="servicios" name="servicios">
+            {% for servicio in servicios %}
+            <option value="{{ servicio.id }}">{{ servicio.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Empleado</button>
+        <button type="button" id="cancelarBtn" class="btn btn-secondary">
+          Cancelar
+        </button>
+      </form>
+
+      <!-- Tabla de Empleados -->
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Cédula</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Celular</th>
+            <th>Servicios</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="empleadosTableBody">
+          {% for empleado in empleados %}
+          <tr>
+            <td>{{ empleado.cedula }}</td>
+            <td>{{ empleado.nombre }}</td>
+            <td>{{ empleado.email }}</td>
+            <td>{{ empleado.celular }}</td>
+            <td>{{ empleado.get_servicios }}</td>
+            <td>
+              <button
+                class="btn btn-sm btn-warning editar-empleado"
+                data-id="{{ empleado.id }}"
+              >
+                Editar
+              </button>
+              <button
+                class="btn btn-sm btn-danger eliminar-empleado"
+                data-id="{{ empleado.id }}"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Cuando el documento esté completamente cargado y listo
+
+        // Muestra el formulario de empleado al hacer clic en el botón "Nuevo Empleado"
+        $("#nuevoEmpleadoBtn").click(function () {
+          $("#empleadoForm").show(); // Muestra el formulario
+          $("#empleadoId").val(""); // Limpia el campo de ID del formulario
+          $("#empleadoForm")[0].reset(); // Resetea todos los campos del formulario a sus valores iniciales
+        });
+
+        // Oculta el formulario de empleado al hacer clic en el botón "Cancelar"
+        $("#cancelarBtn").click(function () {
+          $("#empleadoForm").hide(); // Oculta el formulario
+        });
+
+        // Maneja el envío del formulario de empleado
+        $("#empleadoForm").on("submit", function (e) {
+          e.preventDefault(); // Previene el comportamiento por defecto de envío del formulario
+
+          // Crea un objeto con los datos del formulario
+          var empleadoData = {
+            id: $("#empleadoId").val(),
+            cedula: $("#cedula").val(),
+            nombre: $("#nombre").val(),
+            email: $("#email").val(),
+            celular: $("#celular").val(),
+            servicios: $("#servicios").val(), // Obtiene el array de IDs seleccionados en el campo de servicios
+          };
+
+          // Realiza una solicitud AJAX para crear o actualizar el empleado
+          $.ajax({
+            url: "/crear_actualizar_empleado/", // URL para enviar la solicitud
+            type: "POST", // Tipo de solicitud HTTP
+            contentType: "application/json", // Tipo de contenido de la solicitud
+            data: JSON.stringify(empleadoData), // Convierte los datos del formulario a formato JSON
+            success: function (response) {
+              // Maneja la respuesta de la solicitud
+              if (response.status === "success") {
+                alert(response.message); // Muestra un mensaje de éxito
+                location.reload(); // Recarga la página para actualizar la lista de empleados
+              } else {
+                alert("Error: " + response.message); // Muestra un mensaje de error
+              }
+            },
+          });
+        });
+
+        // Maneja el clic en los botones de edición de empleados
+        $(".editar-empleado").on("click", function () {
+          var empleadoId = $(this).data("id"); // Obtiene el ID del empleado desde el atributo data-id
+          $.get("/obtener_empleado/" + empleadoId + "/", function (data) {
+            // Realiza una solicitud GET para obtener los detalles del empleado
+            $("#empleadoId").val(data.id); // Establece el ID del empleado en el formulario
+            $("#cedula").val(data.cedula); // Llena el campo de cédula con el valor obtenido
+            $("#nombre").val(data.nombre); // Llena el campo de nombre con el valor obtenido
+            $("#email").val(data.email); // Llena el campo de email con el valor obtenido
+            $("#celular").val(data.celular); // Llena el campo de celular con el valor obtenido
+            $("#servicios").val(data.servicios); // Llena el campo de servicios con los IDs obtenidos (esto seleccionará las opciones correspondientes en un campo de selección múltiple)
+            $("#empleadoForm").show(); // Muestra el formulario
+          });
+        });
+
+        // Maneja el clic en los botones de eliminación de empleados
+        $(".eliminar-empleado").on("click", function () {
+          var empleadoId = $(this).data("id"); // Obtiene el ID del empleado desde el atributo data-id
+          if (confirm("¿Está seguro de que desea eliminar este empleado?")) {
+            // Solicita confirmación del usuario
+            // Realiza una solicitud AJAX para eliminar el empleado
+            $.ajax({
+              url: "/eliminar_empleado/", // URL para enviar la solicitud
+              type: "POST", // Tipo de solicitud HTTP
+              contentType: "application/json", // Tipo de contenido de la solicitud
+              data: JSON.stringify({ id: empleadoId }), // Envía el ID del empleado como JSON
+              success: function (response) {
+                // Maneja la respuesta de la solicitud
+                if (response.status === "success") {
+                  alert(response.message); // Muestra un mensaje de éxito
+                  location.reload(); // Recarga la página para actualizar la lista de empleados
+                } else {
+                  alert("Error: " + response.message); // Muestra un mensaje de error
+                }
+              },
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
