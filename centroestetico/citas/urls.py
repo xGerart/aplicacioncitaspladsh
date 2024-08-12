@@ -15,4 +15,6 @@ urlpatterns = [
     path('gestion_servicios/', views.gestion_servicios, name='gestion_servicios'),
     path('crear_actualizar_servicio/', views.crear_actualizar_servicio, name='crear_actualizar_servicio'),
     path('eliminar_servicio/', views.eliminar_servicio, name='eliminar_servicio'),
+    
+    path('agendar/', views.agendar_cita, name='agendar_cita'),
 ]

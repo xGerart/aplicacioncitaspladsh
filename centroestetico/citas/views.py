@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Cliente, Empleado, Servicio
+from .models import Cliente, Empleado, Servicio, HorarioEmpleado, AusenciaEmpleado
+from django.utils import timezone
 import json
-
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
 ## CLIENTES ##
+
 
 def gestion_clientes(request):
     clientes = Cliente.objects.all()
@@ -52,6 +55,7 @@ def eliminar_cliente(request):
 
 
 ## EMPLEADOS ##
+
 
 def obtener_empleado(request, empleado_id):
     empleado = get_object_or_404(Empleado, id=empleado_id)
@@ -119,7 +123,32 @@ def eliminar_empleado(request):
             return JsonResponse({"status": "error", "message": str(e)})
 
 
+def verificar_disponibilidad(empleado, fecha_hora):
+    dia_semana = fecha_hora.weekday()
+    hora = fecha_hora.time()
+
+    # Verificar horario regular
+    horario = HorarioEmpleado.objects.filter(
+        empleado=empleado,
+        dia_semana=dia_semana,
+        hora_inicio__lte=hora,
+        hora_fin__gte=hora,
+        disponible=True,
+    ).exists()
+
+    if not horario:
+        return False
+
+    # Verificar ausencias
+    ausencia = AusenciaEmpleado.objects.filter(
+        empleado=empleado, fecha_inicio__lte=fecha_hora, fecha_fin__gte=fecha_hora
+    ).exists()
+
+    return not ausencia
+
+
 ## SERVICIOS ##
+
 
 def gestion_servicios(request):
     servicios = Servicio.objects.all()
@@ -165,3 +194,24 @@ def eliminar_servicio(request):
             )
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)})
+
+
+## CITAS ##
+
+
+def agendar_cita(request):
+    servicios = Servicio.objects.all()
+    empleados = Empleado.objects.all()
+    
+    servicios_list = json.loads(serialize('json', servicios))
+    empleados_list = json.loads(serialize('json', empleados))
+    
+    for empleado in empleados_list:
+        empleado_obj = Empleado.objects.get(pk=empleado['pk'])
+        empleado['fields']['servicios'] = list(empleado_obj.servicios.values_list('id', flat=True))
+    
+    return render(request, 'prototipocitas1.html', {
+        'servicios': servicios,  # Pasar los objetos Servicio directamente
+        'servicios_json': json.dumps(servicios_list),
+        'empleados_json': json.dumps(empleados_list),
+    })

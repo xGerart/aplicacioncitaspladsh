@@ -77,3 +77,19 @@ class Cita(models.Model):
     class Meta:
         verbose_name = "Cita"
         verbose_name_plural = "Citas"
+
+class HorarioEmpleado(models.Model):
+    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='horarios')
+    dia_semana = models.IntegerField(choices=[(i, day) for i, day in enumerate(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'])])
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+    disponible = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('empleado', 'dia_semana')
+
+class AusenciaEmpleado(models.Model):
+    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='ausencias')
+    fecha_inicio = models.DateTimeField()
+    fecha_fin = models.DateTimeField()
+    motivo = models.CharField(max_length=255, blank=True)

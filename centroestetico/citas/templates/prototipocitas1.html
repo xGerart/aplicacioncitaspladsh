@@ -1,142 +1,225 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Agendar Cita</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        .tab-content {
-            padding: 20px;
-            border: 1px solid #dee2e6;
-            border-top: none;
-        }
-        .service-item, .professional-item {
-            cursor: pointer;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #dee2e6;
-        }
-        .service-item.selected, .professional-item.selected {
-            background-color: #e9ecef;
-        }
-        .summary {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
+
 <body>
     <div class="container mt-5">
         <h2 class="mb-4">Agendar Cita</h2>
-        
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="services-tab" data-bs-toggle="tab" data-bs-target="#services" type="button" role="tab" aria-controls="services" aria-selected="true">Servicios</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="professional-tab" data-bs-toggle="tab" data-bs-target="#professional" type="button" role="tab" aria-controls="professional" aria-selected="false">Profesional</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="datetime-tab" data-bs-toggle="tab" data-bs-target="#datetime" type="button" role="tab" aria-controls="datetime" aria-selected="false">Fecha y Hora</button>
-            </li>
-        </ul>
-        
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="services" role="tabpanel" aria-labelledby="services-tab">
-                <div class="row">
-                    <div class="col-md-8">
-                        <div id="servicesList">
-                            <!-- Los servicios se cargarán aquí dinámicamente -->
+        <div class="row">
+            <div class="col-md-8">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="services-tab" data-bs-toggle="tab"
+                            data-bs-target="#services" type="button" role="tab" aria-controls="services"
+                            aria-selected="true">
+                            Servicios
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="professional-tab" data-bs-toggle="tab"
+                            data-bs-target="#professional" type="button" role="tab" aria-controls="professional"
+                            aria-selected="false" disabled>
+                            Profesional
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="datetime-tab" data-bs-toggle="tab" data-bs-target="#datetime"
+                            type="button" role="tab" aria-controls="datetime" aria-selected="false" disabled>
+                            Fecha y Hora
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div id="services" class="tab-pane fade show active" role="tabpanel" aria-labelledby="services-tab"
+                        data-next-tab="professional">
+                        <div class="mt-3">
+                            {% for servicio in servicios %}
+                            <div class="form-check">
+                                <input class="form-check-input servicio-check" type="checkbox" value="{{ servicio.id }}"
+                                    id="servicio{{ servicio.id }}" data-nombre="{{ servicio.nombre }}"
+                                    data-precio="{{ servicio.precio }}" data-duracion="{{ servicio.duracion }}">
+                                <label class="form-check-label" for="servicio{{ servicio.id }}">
+                                    {{ servicio.nombre }} - ${{ servicio.precio }} ({{ servicio.duracion }} min)
+                                </label>
+                            </div>
+                            {% endfor %}
                         </div>
+                        <button class="btn btn-primary btn-continuar mt-3" type="button">Continuar</button>
                     </div>
-                    <div class="col-md-4">
-                        <div class="summary">
-                            <h4>Resumen</h4>
-                            <div id="selectedServices"></div>
-                            <hr>
-                            <div id="totalSummary"></div>
+                    <div id="professional" class="tab-pane fade" role="tabpanel" aria-labelledby="professional-tab"
+                        data-next-tab="datetime">
+                        <div class="mt-3">
+                            <div class="form-check">
+                                <input class="form-check-input professional-radio" type="radio" name="professional"
+                                    id="any-professional" value="any" checked>
+                                <label class="form-check-label" for="any-professional">
+                                    Cualquier profesional disponible
+                                </label>
+                            </div>
+                            {% for empleado in empleados %}
+                            <div class="form-check profesional-item">
+                                <input class="form-check-input professional-radio" type="radio" name="professional"
+                                    id="professional-{{ empleado.id }}" value="{{ empleado.id }}"
+                                    data-servicios="{{ empleado.servicios.all|json_script:" servicios-empleado-"|safe
+                                    }}">
+                                <label class="form-check-label" for="professional-{{ empleado.id }}">
+                                    {{ empleado.nombre }}
+                                </label>
+                            </div>
+                            {% endfor %}
                         </div>
+                        <button class="btn btn-primary btn-continuar mt-3" type="button">Continuar</button>
+                    </div>
+                    <div id="datetime" class="tab-pane fade" role="tabpanel" aria-labelledby="datetime-tab">
+                        <div class="mt-3">
+                            <!-- Aquí irá el selector de fecha y hora -->
+                            <p>
+                                Contenido para selección de fecha y hora (por implementar)
+                            </p>
+                        </div>
+                        <button class="btn btn-primary btn-continuar mt-3" type="button">
+                            Agendar Cita
+                        </button>
                     </div>
                 </div>
-                <button class="btn btn-primary mt-3" onclick="nextTab('professional-tab')">Continuar</button>
             </div>
-            
-            <div class="tab-pane fade" id="professional" role="tabpanel" aria-labelledby="professional-tab">
-                <div id="professionalsList">
-                    <div class="professional-item" data-id="any">Cualquier profesional disponible</div>
-                    <!-- Más profesionales se cargarán aquí dinámicamente -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Resumen de la Cita</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="selectedServices"></div>
+                        <div id="selectedProfessional"></div>
+                        <div id="selectedDateTime"></div>
+                        <hr />
+                        <div id="totalSummary"></div>
+                    </div>
                 </div>
-                <button class="btn btn-primary mt-3" onclick="nextTab('datetime-tab')">Continuar</button>
-            </div>
-            
-            <div class="tab-pane fade" id="datetime" role="tabpanel" aria-labelledby="datetime-tab">
-                <div id="calendar"></div>
-                <div id="timeSlots"></div>
-                <button class="btn btn-primary mt-3" onclick="bookAppointment()">Agendar Cita</button>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let selectedServices = [];
-        let selectedProfessional = null;
+        document.addEventListener("DOMContentLoaded", function () {
+            const servicios = JSON.parse("{{ servicios_json|escapejs }}");
+            const empleados = JSON.parse("{{ empleados_json|escapejs }}");
+            const serviciosChecks = document.querySelectorAll(".servicio-check");
+            const profesionalRadios = document.querySelectorAll(
+                ".professional-radio"
+            );
+            const resumenServicios = document.getElementById("selectedServices");
+            const resumenProfesional = document.getElementById(
+                "selectedProfessional"
+            );
+            const resumenDateTime = document.getElementById("selectedDateTime");
+            const resumenTotal = document.getElementById("totalSummary");
+            const continuarBtns = document.querySelectorAll(".btn-continuar");
 
-        // Simula cargar servicios desde el backend
-        function loadServices() {
-            const services = [
-                { id: 1, name: "Pedicura", duration: "1h 15min", price: 12 },
-                { id: 2, name: "Manicura", duration: "1h 30min", price: 18 }
-            ];
-            const servicesList = document.getElementById('servicesList');
-            services.forEach(service => {
-                const div = document.createElement('div');
-                div.className = 'service-item';
-                div.innerHTML = `<strong>${service.name}</strong> - ${service.duration} - $${service.price}`;
-                div.onclick = () => toggleService(service);
-                servicesList.appendChild(div);
+            let totalPrecio = 0;
+            let totalDuracion = 0;
+
+            serviciosChecks.forEach(check => {
+                check.addEventListener('change', () => {
+                    actualizarResumenServicios();
+                    actualizarProfesionalesDisponibles();
+                });
             });
-        }
 
-        function toggleService(service) {
-            const index = selectedServices.findIndex(s => s.id === service.id);
-            if (index > -1) {
-                selectedServices.splice(index, 1);
-            } else {
-                selectedServices.push(service);
+            profesionalRadios.forEach((radio) => {
+                radio.addEventListener("change", actualizarResumenProfesional);
+            });
+
+            function actualizarResumenServicios() {
+                resumenServicios.innerHTML = "<h6>Servicios seleccionados:</h6>";
+                totalPrecio = 0;
+                totalDuracion = 0;
+
+                serviciosChecks.forEach((check) => {
+                    if (check.checked) {
+                        const nombre = check.dataset.nombre;
+                        const precio = parseFloat(check.dataset.precio);
+                        const duracion = parseInt(check.dataset.duracion);
+
+                        resumenServicios.innerHTML += `
+                        <p>${nombre} - $${precio.toFixed(
+                            2
+                        )} (${duracion} min)</p>
+                    `;
+                        totalPrecio += precio;
+                        totalDuracion += duracion;
+                    }
+                });
+
+                actualizarResumenTotal();
             }
-            updateSummary();
-        }
 
-        function updateSummary() {
-            const summaryDiv = document.getElementById('selectedServices');
-            const totalDiv = document.getElementById('totalSummary');
-            summaryDiv.innerHTML = '';
-            let total = 0;
-            selectedServices.forEach(service => {
-                summaryDiv.innerHTML += `<p>${service.name} - $${service.price}</p>`;
-                total += service.price;
+            function actualizarProfesionalesDisponibles() {
+                const serviciosSeleccionados = Array.from(document.querySelectorAll('.servicio-check:checked')).map(check => parseInt(check.value));
+                const profesionales = document.querySelectorAll('.profesional-item');
+
+                profesionales.forEach(prof => {
+                    const radio = prof.querySelector('.professional-radio');
+                    if (radio.id === 'any-professional') return; // Siempre mostrar "Cualquier profesional disponible"
+
+                    const serviciosProfesional = JSON.parse(document.getElementById(`servicios-empleado-${radio.value}`).textContent);
+                    const puedeRealizarTodos = serviciosSeleccionados.every(servicio => serviciosProfesional.includes(servicio));
+
+                    prof.style.display = puedeRealizarTodos ? '' : 'none';
+                });
+
+                // Desseleccionar el profesional si ya no está disponible
+                const profesionalSeleccionado = document.querySelector('.professional-radio:checked');
+                if (profesionalSeleccionado && profesionalSeleccionado.closest('.profesional-item').style.display === 'none') {
+                    document.getElementById('any-professional').checked = true;
+                    actualizarResumenProfesional();
+                }
+            }
+            function actualizarResumenProfesional() {
+                const seleccionado = document.querySelector(
+                    'input[name="professional"]:checked'
+                );
+                const profesionalNombre =
+                    seleccionado.id === "any-professional"
+                        ? "Cualquier profesional disponible"
+                        : seleccionado.nextElementSibling.textContent.trim();
+
+                resumenProfesional.innerHTML = `<h6>Profesional:</h6><p>${profesionalNombre}</p>`;
+                actualizarResumenTotal();
+            }
+
+            function actualizarResumenTotal() {
+                resumenTotal.innerHTML = `
+                <p><strong>Total: $${totalPrecio.toFixed(2)}</strong></p>
+                <p><strong>Duración total: ${totalDuracion} min</strong></p>
+            `;
+            }
+
+            // Manejar la navegación entre pestañas
+            continuarBtns.forEach((btn) => {
+                btn.addEventListener("click", function () {
+                    const currentTab = this.closest(".tab-pane");
+                    const nextTabId = currentTab.dataset.nextTab;
+                    if (nextTabId) {
+                        const nextTab = document.querySelector(`#${nextTabId}-tab`);
+                        nextTab.disabled = false;
+                        nextTab.click();
+                    }
+                });
             });
-            totalDiv.innerHTML = `<strong>Total: $${total}</strong>`;
-        }
 
-        function nextTab(tabId) {
-            const nextTab = document.getElementById(tabId);
-            const tab = new bootstrap.Tab(nextTab);
-            tab.show();
-        }
-
-        function bookAppointment() {
-            // Aquí iría la lógica para confirmar la cita
-            console.log("Cita agendada", { services: selectedServices, professional: selectedProfessional });
-            alert("Cita agendada con éxito!");
-        }
-
-        // Cargar servicios al iniciar
-        loadServices();
+            // Inicializar el resumen
+            actualizarResumenServicios();
+            actualizarProfesionalesDisponibles();
+        });
     </script>
 </body>
+
 </html>

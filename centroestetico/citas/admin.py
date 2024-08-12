@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Cliente, Empleado, Servicio, Cita
+from .models import Cliente, Empleado, Servicio, Cita,HorarioEmpleado, AusenciaEmpleado
 
 
 @admin.register(Cliente)
@@ -16,8 +16,17 @@ class ClienteAdmin(admin.ModelAdmin):
     list_filter = ('fechanacimiento',)
 
 
+class HorarioEmpleadoInline(admin.TabularInline):
+    model = HorarioEmpleado
+    extra = 7 
+
+class AusenciaEmpleadoInline(admin.TabularInline):
+    model = AusenciaEmpleado
+    extra = 1
+
 @admin.register(Empleado)
 class EmpleadoAdmin(admin.ModelAdmin):
+    inlines = [HorarioEmpleadoInline, AusenciaEmpleadoInline]
     list_display = (
         'id',
         'cedula',
