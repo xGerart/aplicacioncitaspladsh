@@ -18,7 +18,7 @@
         Nuevo Cliente
       </button>
 
-      <!-- Formulario de Cliente (inicialmente oculto) -->
+      <!-- Formulario para llenar datos oculto -->
       <form id="clienteForm" class="mb-5" style="display: none">
         <input type="hidden" id="clienteId" />
         <div class="mb-3">
@@ -54,7 +54,7 @@
         </button>
       </form>
 
-      <!-- Tabla de Clientes -->
+      <!-- Tabla -->
       <table class="table table-striped">
         <thead>
           <tr>
@@ -97,25 +97,20 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       $(document).ready(function () {
-        // Cuando el documento esté completamente cargado y listo
-
-        // Muestra el formulario de cliente al hacer clic en el botón "Nuevo Cliente"
+        // Botón nuevo
         $("#nuevoClienteBtn").click(function () {
-          $("#clienteForm").show(); // Muestra el formulario
-          $("#clienteId").val(""); // Limpia el campo de ID del formulario
-          $("#clienteForm")[0].reset(); // Resetea todos los campos del formulario a sus valores iniciales
+          $("#clienteForm").show();
+          $("#clienteId").val("");
+          $("#clienteForm")[0].reset();
         });
-
-        // Oculta el formulario de cliente al hacer clic en el botón "Cancelar"
+        // Botón cancelar
         $("#cancelarBtn").click(function () {
-          $("#clienteForm").hide(); // Oculta el formulario
+          $("#clienteForm").hide();
         });
 
-        // Maneja el envío del formulario de cliente
         $("#clienteForm").on("submit", function (e) {
-          e.preventDefault(); // Previene el comportamiento por defecto de envío del formulario
+          e.preventDefault();
 
-          // Crea un objeto con los datos del formulario
           var clienteData = {
             id: $("#clienteId").val(),
             cedula: $("#cedula").val(),
@@ -125,55 +120,50 @@
             fechanacimiento: $("#fechanacimiento").val(),
           };
 
-          // Realiza una solicitud AJAX para crear o actualizar el cliente
           $.ajax({
-            url: "/crear_actualizar_cliente/", // URL para enviar la solicitud
-            type: "POST", // Tipo de solicitud HTTP
-            contentType: "application/json", // Tipo de contenido de la solicitud
-            data: JSON.stringify(clienteData), // Convierte los datos del formulario a formato JSON
+            url: "/crear_actualizar_cliente/",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(clienteData),
             success: function (response) {
-              // Maneja la respuesta de la solicitud
               if (response.status === "success") {
-                alert(response.message); // Muestra un mensaje de éxito
-                location.reload(); // Recarga la página para actualizar la lista de clientes
+                alert(response.message);
+                location.reload();
               } else {
-                alert("Error: " + response.message); // Muestra un mensaje de error
+                alert("Error: " + response.message);
               }
             },
           });
         });
 
-        // Maneja el clic en los botones de edición de clientes
+        // Botón de editar
         $(".editar-cliente").on("click", function () {
-          var clienteId = $(this).data("id"); // Obtiene el ID del cliente desde el atributo data-id
-          var row = $(this).closest("tr"); // Encuentra la fila más cercana al botón en el que se hizo clic
-          $("#clienteId").val(clienteId); // Establece el ID del cliente en el formulario
-          $("#cedula").val(row.find("td:eq(0)").text()); // Llena el campo de cédula con el valor de la primera celda de la fila
-          $("#nombre").val(row.find("td:eq(1)").text()); // Llena el campo de nombre con el valor de la segunda celda de la fila
-          $("#email").val(row.find("td:eq(2)").text()); // Llena el campo de email con el valor de la tercera celda de la fila
-          $("#celular").val(row.find("td:eq(3)").text()); // Llena el campo de celular con el valor de la cuarta celda de la fila
-          $("#fechanacimiento").val(row.find("td:eq(4)").text()); // Llena el campo de fecha de nacimiento con el valor de la quinta celda de la fila
-          $("#clienteForm").show(); // Muestra el formulario
+          var clienteId = $(this).data("id");
+          var row = $(this).closest("tr");
+          $("#clienteId").val(clienteId);
+          $("#cedula").val(row.find("td:eq(0)").text());
+          $("#nombre").val(row.find("td:eq(1)").text());
+          $("#email").val(row.find("td:eq(2)").text());
+          $("#celular").val(row.find("td:eq(3)").text());
+          $("#fechanacimiento").val(row.find("td:eq(4)").text());
+          $("#clienteForm").show();
         });
 
-        // Maneja el clic en los botones de eliminación de clientes
+        // Botón eliminar
         $(".eliminar-cliente").on("click", function () {
-          var clienteId = $(this).data("id"); // Obtiene el ID del cliente desde el atributo data-id
+          var clienteId = $(this).data("id");
           if (confirm("¿Está seguro de que desea eliminar este cliente?")) {
-            // Solicita confirmación del usuario
-            // Realiza una solicitud AJAX para eliminar el cliente
             $.ajax({
-              url: "/eliminar_cliente/", // URL para enviar la solicitud
-              type: "POST", // Tipo de solicitud HTTP
-              contentType: "application/json", // Tipo de contenido de la solicitud
-              data: JSON.stringify({ id: clienteId }), // Envía el ID del cliente como JSON
+              url: "/eliminar_cliente/",
+              type: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({ id: clienteId }),
               success: function (response) {
-                // Maneja la respuesta de la solicitud
                 if (response.status === "success") {
-                  alert(response.message); // Muestra un mensaje de éxito
-                  location.reload(); // Recarga la página para actualizar la lista de clientes
+                  alert(response.message);
+                  location.reload();
                 } else {
-                  alert("Error: " + response.message); // Muestra un mensaje de error
+                  alert("Error: " + response.message);
                 }
               },
             });
