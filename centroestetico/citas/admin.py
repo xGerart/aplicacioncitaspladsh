@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Cliente, Empleado, Servicio, Cita,HorarioEmpleado, AusenciaEmpleado
+from .models import Cliente, Servicio, Empleado, Cita, HorarioEmpleado, AusenciaEmpleado
 
 
 @admin.register(Cliente)
@@ -16,35 +16,14 @@ class ClienteAdmin(admin.ModelAdmin):
     list_filter = ('fechanacimiento',)
 
 
-class HorarioEmpleadoInline(admin.TabularInline):
-    model = HorarioEmpleado
-    extra = 7 
-
-class AusenciaEmpleadoInline(admin.TabularInline):
-    model = AusenciaEmpleado
-    extra = 1
-
-@admin.register(Empleado)
-class EmpleadoAdmin(admin.ModelAdmin):
-    inlines = [HorarioEmpleadoInline, AusenciaEmpleadoInline]
-    list_display = (
-        'id',
-        'cedula',
-        'nombre',
-        'email',
-        'celular',
-        'get_servicios',
-    )
-    filter_horizontal = ('servicios',)
-
-    def get_servicios(self, obj):
-        return obj.get_servicios()
-    get_servicios.short_description = 'Servicios'
-
-
 @admin.register(Servicio)
 class ServicioAdmin(admin.ModelAdmin):
     list_display = ('id', 'nombre', 'descripcion', 'precio', 'duracion')
+
+
+@admin.register(Empleado)
+class EmpleadoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'cedula', 'get_servicios')
 
 
 @admin.register(Cita)
@@ -58,9 +37,23 @@ class CitaAdmin(admin.ModelAdmin):
         'estado',
         'notas',
     )
-    list_filter = (
-        'cliente',
-        'servicio',
+    list_filter = ('cliente', 'servicio', 'empleado', 'fechahorainicio')
+
+
+@admin.register(HorarioEmpleado)
+class HorarioEmpleadoAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
         'empleado',
-        'fechahorainicio',
+        'dia_semana',
+        'hora_inicio',
+        'hora_fin',
+        'disponible',
     )
+    list_filter = ('empleado', 'disponible')
+
+
+@admin.register(AusenciaEmpleado)
+class AusenciaEmpleadoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'empleado', 'fecha_inicio', 'fecha_fin', 'motivo')
+    list_filter = ('empleado', 'fecha_inicio', 'fecha_fin')

@@ -1,13 +1,13 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers import serialize
-from .models import Cliente, Empleado, Servicio, HorarioEmpleado, AusenciaEmpleado
+from django.http import JsonResponse
+from .models import Cliente, Empleado, Servicio
 import json
 
 ## CLIENTES ##
 
-
+@csrf_exempt
 def gestion_clientes(request):
     clientes = Cliente.objects.all()
     return render(request, "gestion_clientes.html", {"clientes": clientes})

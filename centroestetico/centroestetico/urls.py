@@ -16,8 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from citas import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('citas/', include('citas.urls')), 
+    path('citas/gestion_clientes/', views.gestion_clientes, name='gestion_clientes'),
+    path('citas/crear_actualizar_cliente/', views.crear_actualizar_cliente, name='crear_actualizar_cliente'),
+    path('citas/eliminar_cliente/', views.eliminar_cliente, name='eliminar_cliente'),
+    path('citas/agendar/', views.agendar_cita, name='agendar_cita'),
+    path('accounts/', include('allauth.urls')),
 ]

@@ -167,7 +167,7 @@
 
                 profesionales.forEach(prof => {
                     const radio = prof.querySelector('.professional-radio');
-                    if (radio.id === 'any-professional') return; // Siempre mostrar "Cualquier profesional disponible"
+                    if (radio.id === 'any-professional') return; 
 
                     const serviciosProfesional = JSON.parse(document.getElementById(`servicios-empleado-${radio.value}`).textContent);
                     const puedeRealizarTodos = serviciosSeleccionados.every(servicio => serviciosProfesional.includes(servicio));
@@ -175,7 +175,7 @@
                     prof.style.display = puedeRealizarTodos ? '' : 'none';
                 });
 
-                // Desseleccionar el profesional si ya no está disponible
+                
                 const profesionalSeleccionado = document.querySelector('.professional-radio:checked');
                 if (profesionalSeleccionado && profesionalSeleccionado.closest('.profesional-item').style.display === 'none') {
                     document.getElementById('any-professional').checked = true;

@@ -18,7 +18,7 @@
         Nuevo Cliente
       </button>
 
-      <!-- Formulario para llenar datos oculto -->
+      <!-- Formulario para llenar datos -->
       <form id="clienteForm" class="mb-5" style="display: none">
         <input type="hidden" id="clienteId" />
         <div class="mb-3">
@@ -121,7 +121,7 @@
           };
 
           $.ajax({
-            url: "/crear_actualizar_cliente/",
+            url: "/citas/crear_actualizar_cliente/",
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify(clienteData),
@@ -152,7 +152,7 @@
         // Botón eliminar
         $(".eliminar-cliente").on("click", function () {
           var clienteId = $(this).data("id");
-          if (confirm("¿Está seguro de que desea eliminar este cliente?")) {
+          if (confirm("¿Desea eliminar este cliente?")) {
             $.ajax({
               url: "/eliminar_cliente/",
               type: "POST",

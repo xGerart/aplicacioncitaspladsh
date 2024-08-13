@@ -1,6 +1,5 @@
 from django.db import models
 from datetime import timedelta
-from django.core.validators import MinValueValidator
 
 
 class Cliente(models.Model):
@@ -13,10 +12,6 @@ class Cliente(models.Model):
     def __str__(self):
         return f"{self.nombre} {self.cedula}"
 
-    class Meta:
-        verbose_name = "Cliente"
-        verbose_name_plural = "Clientes"
-
 
 class Servicio(models.Model):
     nombre = models.CharField(max_length=100)
@@ -26,10 +21,6 @@ class Servicio(models.Model):
 
     def __str__(self):
         return self.nombre
-
-    class Meta:
-        verbose_name = "Servicio"
-        verbose_name_plural = "Servicios"
 
 
 class Empleado(models.Model):
@@ -41,10 +32,6 @@ class Empleado(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.cedula})"
-
-    class Meta:
-        verbose_name = "Empleado"
-        verbose_name_plural = "Empleados"
 
     def get_servicios(self):
         return ", ".join([servicio.nombre for servicio in self.servicios.all()])
@@ -74,22 +61,30 @@ class Cita(models.Model):
     def __str__(self):
         return f"Cita de {self.cliente.nombre} para {self.servicio.nombre}"
 
-    class Meta:
-        verbose_name = "Cita"
-        verbose_name_plural = "Citas"
 
 class HorarioEmpleado(models.Model):
-    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='horarios')
-    dia_semana = models.IntegerField(choices=[(i, day) for i, day in enumerate(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'])])
+    OPCIONESDIAS = [
+        (0, "Lunes"),
+        (1, "Martes"),
+        (2, "Miércoles"),
+        (3, "Jueves"),
+        (4, "Viernes"),
+        (5, "Sábado"),
+        (6, "Domingo"),
+    ]
+    empleado = models.ForeignKey(
+        Empleado, on_delete=models.CASCADE, related_name="horarios"
+    )
+    dia_semana = models.IntegerField(choices=OPCIONESDIAS)
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
     disponible = models.BooleanField(default=True)
 
-    class Meta:
-        unique_together = ('empleado', 'dia_semana')
 
 class AusenciaEmpleado(models.Model):
-    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='ausencias')
+    empleado = models.ForeignKey(
+        Empleado, on_delete=models.CASCADE, related_name="ausencias"
+    )
     fecha_inicio = models.DateTimeField()
     fecha_fin = models.DateTimeField()
     motivo = models.CharField(max_length=255, blank=True)
