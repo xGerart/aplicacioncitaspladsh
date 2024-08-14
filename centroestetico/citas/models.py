@@ -33,14 +33,14 @@ class Empleado(models.Model):
     def __str__(self):
         return f"{self.nombre} ({self.cedula})"
 
-    def get_servicios(self):
+    def obtener_servicios(self):
         return ", ".join([servicio.nombre for servicio in self.servicios.all()])
 
 
 class Cita(models.Model):
     OPCIONESESTADO = [
-        ("confirmada", "Cita Confirmada"),
-        ("cancelada", "Cita Cancelada"),
+        (2, "Cita Confirmada"),
+        (1, "Cita Cancelada"),
     ]
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="citas")
     servicio = models.ForeignKey(
@@ -50,7 +50,7 @@ class Cita(models.Model):
         Empleado, on_delete=models.CASCADE, related_name="empleados"
     )
     fechahorainicio = models.DateTimeField()
-    estado = models.CharField(max_length=10, choices=OPCIONESESTADO)
+    estado = models.IntegerField(choices=OPCIONESESTADO)
     notas = models.TextField(blank=True)
 
     @property

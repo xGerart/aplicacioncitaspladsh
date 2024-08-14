@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Agendamiento de Citas</h1>
+<p>Esta es la página de inicio de nuestra aplicación.</p>
+{% if user.is_authenticated %}
+<a href='citas/agendar/'>Agendar</a>
+{% else %}
+
+{% endif %}
+
+{% endblock %}

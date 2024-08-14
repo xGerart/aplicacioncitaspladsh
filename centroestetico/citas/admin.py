@@ -23,7 +23,7 @@ class ServicioAdmin(admin.ModelAdmin):
 
 @admin.register(Empleado)
 class EmpleadoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'cedula', 'get_servicios')
+    list_display = ('nombre', 'cedula', 'obtener_servicios')
 
 
 @admin.register(Cita)

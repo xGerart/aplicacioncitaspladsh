@@ -5,6 +5,9 @@ from django.http import JsonResponse
 from .models import Cliente, Empleado, Servicio
 import json
 
+def home(request):
+    return render(request, 'home.html')
+
 ## CLIENTES ##
 
 @csrf_exempt
