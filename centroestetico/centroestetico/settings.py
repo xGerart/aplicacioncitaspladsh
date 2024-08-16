@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'crispy_forms',  
+    'crispy_forms',
     'crispy_bootstrap4',
     'citas.apps.CitasConfig'
 
@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'centroestetico.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.mysql',
-        'NAME':'gerart674$aplicacioncitaspladsh',
+        'NAME':'gerart674$default',
         'USER':'gerart674',
         'PASSWORD':'172503Gt',
         'HOST':'gerart674.mysql.pythonanywhere-services.com',
@@ -135,7 +135,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_ROOT = '/home/tuusuario/aplicacioncitaspladsh/static'
+STATIC_ROOT = '/home/gerart674/aplicacioncitaspladsh/static'
 STATIC_URL = 'static/'
 
 # Default primary key field type
@@ -155,8 +155,8 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
-LOGIN_REDIRECT_URL = '/'  
-ACCOUNT_LOGOUT_REDIRECT_URL = '/' 
+LOGIN_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
