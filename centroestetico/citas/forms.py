@@ -1,6 +1,7 @@
 from django import forms
 from .models import Servicio, Empleado, Cliente, Cita
 from allauth.account.forms import SignupForm
+from django.db import transaction
 
 class CitaForm(forms.ModelForm):
     servicio = forms.ModelChoiceField(
@@ -46,14 +47,17 @@ class CombinedSignupForm(SignupForm):
     celular = forms.CharField(max_length=10)
     fechanacimiento = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
+     @transaction.atomic
     def save(self, request):
         user = super(CombinedSignupForm, self).save(request)
-        cliente = Cliente.objects.create(
+        cliente, created = Cliente.objects.get_or_create(
             user=user,
-            cedula=self.cleaned_data.get('cedula'),
-            nombre=self.cleaned_data.get('nombre'),
-            email=self.cleaned_data.get('email'),
-            celular=self.cleaned_data.get('celular'),
-            fechanacimiento=self.cleaned_data.get('fechanacimiento')
+            defaults={
+                'cedula': self.cleaned_data.get('cedula'),
+                'nombre': self.cleaned_data.get('nombre'),
+                'email': self.cleaned_data.get('email'),
+                'celular': self.cleaned_data.get('celular'),
+                'fechanacimiento': self.cleaned_data.get('fechanacimiento')
+            }
         )
         return user

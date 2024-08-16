@@ -13,7 +13,7 @@ class Cliente(models.Model):
         (CLIENTE, 'Cliente'),
         (RECEPCIONISTA, 'Recepcionista'),
     ]
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True,unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     cedula = models.CharField(max_length=10, unique=True)
     nombre = models.CharField(max_length=100)
     email = models.EmailField()
