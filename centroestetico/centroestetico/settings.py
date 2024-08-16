@@ -170,3 +170,5 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'gerart675@gmail.com'
 EMAIL_HOST_PASSWORD = 'roze slfn mcnh nmmw'
+
+ACCOUNT_FORMS = {'signup': 'yourapp.forms.CombinedSignupForm'}
