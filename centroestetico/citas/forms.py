@@ -47,8 +47,8 @@ class CombinedSignupForm(SignupForm):
     celular = forms.CharField(max_length=10)
     fechanacimiento = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
-     @transaction.atomic
-    def save(self, request):
+@transaction.atomic
+def save(self, request):
         user = super(CombinedSignupForm, self).save(request)
         cliente, created = Cliente.objects.get_or_create(
             user=user,
