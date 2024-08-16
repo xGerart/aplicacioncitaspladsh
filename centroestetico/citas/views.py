@@ -1,15 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
-from datetime import datetime, time, timedelta
-from .models import Empleado, Cita, Cliente, Servicio
+from datetime import datetime, time
+from .models import Empleado, Cita, Cliente
 from .forms import CitaForm
 from django.core.mail import send_mail
-from django.http import HttpResponse
 from django.conf import settings
+from .decorators import cliente_required, recepcionista_required
 
 def es_recepcionista(user):
     try:
@@ -23,7 +22,8 @@ def es_cliente(user):
     except Cliente.DoesNotExist:
         return False
 
-#@user_passes_test(es_cliente)
+@login_required
+@cliente_required
 def agendar_cita(request):
     if request.method == 'POST':
         form = CitaForm(request.POST)
@@ -94,7 +94,7 @@ def get_bloques_disponibles(request):
     return JsonResponse({'bloques': bloques_disponibles})
 
 @login_required
-#@user_passes_test(es_recepcionista)
+@recepcionista_required
 def gestion_citas(request):
     fecha = request.GET.get("fecha")
     if fecha:
