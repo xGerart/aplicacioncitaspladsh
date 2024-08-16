@@ -19,7 +19,7 @@ class ServicioAdmin(admin.ModelAdmin):
 
 @admin.register(Empleado)
 class EmpleadoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'cedula', 'nombre', 'email', 'celular')  
+    list_display = ('id', 'cedula', 'nombre', 'email', 'celular','obtener_servicios')  
     raw_id_fields = ('servicios',)
 
 
