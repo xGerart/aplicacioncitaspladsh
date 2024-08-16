@@ -134,7 +134,8 @@ def home(request):
         cliente = request.user.cliente
         is_cliente = cliente.rol == Cliente.CLIENTE
         is_recepcionista = cliente.rol == Cliente.RECEPCIONISTA
-        logger.info(f"Usuario: {request.user.username}, Rol: {cliente.rol}, Is Cliente: {is_cliente}, Is Recepcionista: {is_recepcionista}")
+        logger.info(f"Usuario: {request.user.username}, Rol (raw): {cliente.rol}, "
+                    f"Constante CLIENTE: {Cliente.CLIENTE}, Constante RECEPCIONISTA: {Cliente.RECEPCIONISTA}")
     except Cliente.DoesNotExist:
         logger.warning(f"Cliente no existe para el usuario: {request.user.username}")
         cliente = Cliente.objects.create(
@@ -151,10 +152,11 @@ def home(request):
     context = {
         'is_cliente': is_cliente,
         'is_recepcionista': is_recepcionista,
-        'rol': cliente.get_rol_display(),  # Añadimos esto para mostrar el rol en la plantilla
+        'rol': cliente.get_rol_display(),
+        'rol_raw': cliente.rol,
     }
     
-    logger.info(f"Contexto para home: {context}")
+    logger.info(f"Contexto detallado para home: {context}")
     return render(request, 'home.html', context)
 
 # Funciones auxiliares

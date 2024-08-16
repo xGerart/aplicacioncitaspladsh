@@ -4,12 +4,13 @@
     <h1 class="text-center">Bienvenido a nuestro sistema de citas</h1>
 
     <div class="debug-info" style="background-color: #f0f0f0; padding: 10px; margin-bottom: 20px;">
-        <p>Debug Info:</p>
-        <p>User: {{ user.username }}</p>
-        <p>Is authenticated: {{ user.is_authenticated }}</p>
-        <p>Is cliente: {{ is_cliente }}</p>
-        <p>Is recepcionista: {{ is_recepcionista }}</p>
-        <p>Rol: {{ rol }}</p>
+        <p>Información de depuración:</p>
+        <p>Usuario: {{ user.username }}</p>
+        <p>Está autenticado: {{ user.is_authenticated }}</p>
+        <p>Es cliente: {{ is_cliente }}</p>
+        <p>Es recepcionista: {{ is_recepcionista }}</p>
+        <p>Rol (mostrado): {{ rol }}</p>
+        <p>Rol (raw): {{ rol_raw }}</p>
     </div>
 
     {% if user.is_authenticated %}
