@@ -26,6 +26,11 @@ class Cliente(models.Model):
     def is_recepcionista(self):
         return self.rol == self.RECEPCIONISTA
 
+    def save(self, *args, **kwargs):
+        if not self.rol:
+            self.rol = self.CLIENTE
+        super().save(*args, **kwargs)
+
 class Servicio(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()

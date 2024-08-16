@@ -9,6 +9,7 @@ from django.conf import settings
 from .models import Empleado, Cita, Cliente, Servicio
 from .forms import CitaForm
 from .decorators import cliente_required, recepcionista_required
+import logging
 
 # Vistas relacionadas con Citas
 @login_required
@@ -124,13 +125,18 @@ def get_bloques_disponibles(request):
     return JsonResponse({'bloques': bloques_disponibles})
 
 # Vista principal
+
+logger = logging.getLogger(__name__)
+
 @login_required
 def home(request):
     try:
         cliente = request.user.cliente
         is_cliente = cliente.is_cliente()
         is_recepcionista = cliente.is_recepcionista()
+        logger.info(f"Usuario: {request.user.username}, Rol: {cliente.rol}, Is Cliente: {is_cliente}, Is Recepcionista: {is_recepcionista}")
     except Cliente.DoesNotExist:
+        logger.warning(f"Cliente no existe para el usuario: {request.user.username}")
         cliente = Cliente.objects.create(
             user=request.user,
             rol=Cliente.CLIENTE,
@@ -147,6 +153,7 @@ def home(request):
         'is_recepcionista': is_recepcionista,
     }
     
+    logger.info(f"Contexto para home: {context}")
     return render(request, 'home.html', context)
 
 # Funciones auxiliares

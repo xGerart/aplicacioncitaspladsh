@@ -3,6 +3,14 @@
 <div class="container mt-5">
     <h1 class="text-center">Bienvenido a nuestro sistema de citas</h1>
 
+    <div class="debug-info" style="background-color: #f0f0f0; padding: 10px; margin-bottom: 20px;">
+        <p>Debug Info:</p>
+        <p>User: {{ user.username }}</p>
+        <p>Is authenticated: {{ user.is_authenticated }}</p>
+        <p>Is cliente: {{ is_cliente }}</p>
+        <p>Is recepcionista: {{ is_recepcionista }}</p>
+    </div>
+
     {% if user.is_authenticated %}
         {% if is_cliente %}
             <div class="text-center mt-4">
