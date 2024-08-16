@@ -132,8 +132,8 @@ logger = logging.getLogger(__name__)
 def home(request):
     try:
         cliente = request.user.cliente
-        is_cliente = cliente.is_cliente()
-        is_recepcionista = cliente.is_recepcionista()
+        is_cliente = cliente.rol == Cliente.CLIENTE
+        is_recepcionista = cliente.rol == Cliente.RECEPCIONISTA
         logger.info(f"Usuario: {request.user.username}, Rol: {cliente.rol}, Is Cliente: {is_cliente}, Is Recepcionista: {is_recepcionista}")
     except Cliente.DoesNotExist:
         logger.warning(f"Cliente no existe para el usuario: {request.user.username}")
@@ -151,6 +151,7 @@ def home(request):
     context = {
         'is_cliente': is_cliente,
         'is_recepcionista': is_recepcionista,
+        'rol': cliente.get_rol_display(),  # Añadimos esto para mostrar el rol en la plantilla
     }
     
     logger.info(f"Contexto para home: {context}")
