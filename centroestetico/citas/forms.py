@@ -42,22 +42,23 @@ class ClienteForm(forms.ModelForm):
         }
 
 class CombinedSignupForm(SignupForm):
-    cedula = forms.CharField(max_length=10)
+    cedula = forms.CharField(max_length=10, required=True)
     nombre = forms.CharField(max_length=100)
     celular = forms.CharField(max_length=10)
     fechanacimiento = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
 @transaction.atomic
 def save(self, request):
-        user = super(CombinedSignupForm, self).save(request)
-        cliente, created = Cliente.objects.get_or_create(
-            user=user,
-            defaults={
-                'cedula': self.cleaned_data.get('cedula'),
-                'nombre': self.cleaned_data.get('nombre'),
-                'email': self.cleaned_data.get('email'),
-                'celular': self.cleaned_data.get('celular'),
-                'fechanacimiento': self.cleaned_data.get('fechanacimiento')
-            }
-        )
-        return user
+    user = super(CombinedSignupForm, self).save(request)
+    cliente, created = Cliente.objects.update_or_create(
+        user=user,
+        defaults={
+            'cedula': self.cleaned_data.get('cedula'),
+            'nombre': self.cleaned_data.get('nombre'),
+            'email': self.cleaned_data.get('email'),
+            'celular': self.cleaned_data.get('celular'),
+            'fechanacimiento': self.cleaned_data.get('fechanacimiento'),
+            'rol': Cliente.CLIENTE
+        }
+    )
+    return user

@@ -2,9 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from datetime import timedelta
 from django.utils import timezone
-from django.dispatch import receiver
 from django.db.models.signals import post_save
-
 
 class Cliente(models.Model):
     CLIENTE = 'CL'
@@ -29,20 +27,6 @@ class Cliente(models.Model):
 
     def is_recepcionista(self):
         return self.rol == self.RECEPCIONISTA
-    
-    @receiver(post_save, sender=User)
-    def create_user_cliente(sender, instance, created, **kwargs):
-        if created:
-            Cliente.objects.create(user=instance, 
-                               rol=Cliente.CLIENTE,
-                               nombre=instance.username,
-                               email=instance.email,
-                               cedula='0000000000', 
-                               fechanacimiento=timezone.now().date())  
-
-    @receiver(post_save, sender=User)
-    def save_user_cliente(sender, instance, **kwargs):
-     instance.cliente.save()
 
 class Servicio(models.Model):
     nombre = models.CharField(max_length=100)
