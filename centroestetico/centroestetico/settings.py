@@ -42,8 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
-    'allauth.socialaccount', 
-    "citas"
+    'allauth.socialaccount',
+    'crispy_forms',  
+    'crispy_bootstrap4',
+    'citas.apps.CitasConfig'
 
 ]
 
@@ -147,11 +149,17 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
-LOGIN_REDIRECT_URL = '/citas/agendar/'  
+LOGIN_REDIRECT_URL = '/'  
 ACCOUNT_LOGOUT_REDIRECT_URL = '/' 
 
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+ACCOUNT_USERNAME_REQUIRED = True
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'gerart675@gmail.com'
+EMAIL_HOST_PASSWORD = 'roze slfn mcnh nmmw'

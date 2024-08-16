@@ -16,15 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from citas import views
+from citas import views as citas_views
 from . import views as main_views
 
 urlpatterns = [
-    path('', main_views.home, name='home'), 
+    path('', main_views.home, name='home'),
     path('admin/', admin.site.urls),
-    path('citas/gestion_clientes/', views.gestion_clientes, name='gestion_clientes'),
-    path('citas/crear_actualizar_cliente/', views.crear_actualizar_cliente, name='crear_actualizar_cliente'),
-    path('citas/eliminar_cliente/', views.eliminar_cliente, name='eliminar_cliente'),
-    path('citas/agendar/', views.agendar_cita, name='agendar_cita'),
     path('accounts/', include('allauth.urls')),
+    
+    path('citas/', include([
+        path('agendar/', citas_views.agendar_cita, name='agendar_cita'),
+        path('get_empleados_disponibles/', citas_views.get_empleados_disponibles, name='get_empleados_disponibles'),
+        path('get_bloques_disponibles/', citas_views.get_bloques_disponibles, name='get_bloques_disponibles'),
+        path('gestion_citas/', citas_views.gestion_citas, name='gestion_citas'),
+        path('ver/', citas_views.ver_citas, name='ver_citas'),
+        path('cancelar/<int:cita_id>/', citas_views.cancelar_cita, name='cancelar_cita'),
+    ])),
 ]

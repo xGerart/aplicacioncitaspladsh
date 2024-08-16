@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if citas %}
+        <h2 class="mb-4">Mis Citas</h2>
+        <ul class="list-group">
+        {% for cita in citas %}
+            <li class="list-group-item">
+                {{ cita.servicio.nombre }} con {{ cita.empleado.nombre }}
+                el {{ cita.fecha }} a las {{ cita.hora_inicio }}
+                - Estado: {{ cita.get_estado_display }}
+            </li>
+        {% empty %}
+            <li class="list-group-item">No tienes citas programadas.</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <h2 class="mb-4">Agendar Cita</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div id="paso1" class="mb-3">
+                <h3>Paso 1: Seleccionar Servicio</h3>
+                {{ form.servicio }}
+                <button type="button" id="continuarPaso1" class="btn btn-primary mt-2">Continuar</button>
+            </div>
+            <div id="paso2" class="mb-3" style="display: none;">
+                <h3>Paso 2: Seleccionar Empleado</h3>
+                {{ form.empleado|as_crispy_field }}
+                <button type="button" id="continuarPaso2" class="btn btn-primary mt-2">Continuar</button>
+                <button type="button" id="volverPaso1" class="btn btn-secondary mt-2">Volver</button>
+            </div>
+            <div id="paso3" class="mb-3" style="display: none;">
+                <h3>Paso 3: Seleccionar Fecha</h3>
+                {{ form.fecha|as_crispy_field }}
+                <button type="button" id="continuarPaso3" class="btn btn-primary mt-2">Continuar</button>
+                <button type="button" id="volverPaso2" class="btn btn-secondary mt-2">Volver</button>
+            </div>
+            <div id="paso4" class="mb-3" style="display: none;">
+                <h3>Paso 4: Seleccionar Hora</h3>
+                <div id="bloquesHorarios" class="mb-3"></div>
+                {{ form.hora_inicio }}
+                <button type="submit" class="btn btn-success mt-2">Agendar Cita</button>
+                <button type="button" id="volverPaso3" class="btn btn-secondary mt-2">Volver</button>
+            </div>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/agendar_cita.js' %}"></script>
+{% endblock %}

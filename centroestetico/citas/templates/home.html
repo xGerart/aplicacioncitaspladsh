@@ -1,12 +1,26 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h1>Agendamiento de Citas</h1>
-<p>Esta es la página de inicio de nuestra aplicación.</p>
-{% if user.is_authenticated %}
-<a href='citas/agendar/'>Agendar</a>
-{% else %}
+<div class="container mt-5">
+    <h1 class="text-center">Bienvenido a nuestro sistema de citas</h1>
 
-{% endif %}
-
+    {% if user.is_authenticated %}
+        {% if is_cliente %}
+            <div class="text-center mt-4">
+                <a href="{% url 'ver_citas' %}" class="btn btn-primary btn-lg">Ver Mis Citas</a>
+                <a href="{% url 'agendar_cita' %}" class="btn btn-success btn-lg">Agendar Cita</a>
+            </div>
+        {% elif is_recepcionista %}
+            <div class="text-center mt-4">
+                <a href="{% url 'gestion_citas' %}" class="btn btn-primary btn-lg">Gestionar Citas</a>
+            </div>
+        {% else %}
+            <p class="text-center mt-4">No tienes un rol asignado. Por favor, contacta al administrador.</p>
+        {% endif %}
+    {% else %}
+        <p class="text-center mt-4">Por favor, inicia sesión para acceder a las funcionalidades.</p>
+        <div class="text-center mt-2">
+            <a href="{% url 'account_login' %}" class="btn btn-primary">Iniciar Sesión</a>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h1>Gestión de Citas</h1>
+                    <div class="form-group mt-3">
+                        <form method="get">
+                            <label for="fecha">Seleccionar Fecha:</label>
+                            <input type="date" id="fecha" name="fecha" class="form-control" value="{{ fecha|date:'Y-m-d' }}">
+                            <button type="submit" class="btn btn-primary mt-2">Ver Citas</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% for empleado in empleados %}
+                    <h3>{{ empleado.nombre }}</h3>
+                    <ul class="list-group">
+                        {% for cita in citas %}
+                            {% if cita.empleado == empleado %}
+                            <li class="list-group-item">
+                                {{ cita.fecha|date:"d/m/Y" }} {{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}
+                                <br>Cliente: {{ cita.cliente.nombre }}
+                                <br>Servicio: {{ cita.servicio.nombre }}
+                                <br>Estado: 
+                                {% if cita.estado == cita.ESTADO_CONFIRMADA %}
+                                    <span class="badge bg-primary">Confirmada</span>
+                                {% elif cita.estado == cita.ESTADO_EN_PROCESO %}
+                                    <span class="badge bg-warning">En Proceso</span>
+                                {% elif cita.estado == cita.ESTADO_TERMINADA %}
+                                    <span class="badge bg-success">Terminada</span>
+                                {% elif cita.estado == cita.ESTADO_CANCELADA %}
+                                    <span class="badge bg-danger">Cancelada</span>
+                                {% endif %}
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('verCitas').addEventListener('click', function() {
+        var fecha = document.getElementById('fecha').value;
+        window.location.href = '{% url "gestion_citas" %}?fecha=' + fecha;
+    });
+</script>
+{% endblock %}
