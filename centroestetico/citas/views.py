@@ -128,15 +128,19 @@ def get_bloques_disponibles(request):
 def home(request):
     try:
         cliente = request.user.cliente
+        is_cliente = cliente.is_cliente()
+        is_recepcionista = cliente.is_recepcionista()
     except Cliente.DoesNotExist:
-        cliente = Cliente.objects.create(user=request.user, rol=Cliente.CLIENTE, 
-                                         nombre=request.user.username, 
-                                         email=request.user.email,
-                                         cedula='0000000000', 
-                                         fechanacimiento=timezone.now().date()) 
-    
-    is_cliente = cliente.is_cliente()
-    is_recepcionista = cliente.is_recepcionista()
+        cliente = Cliente.objects.create(
+            user=request.user,
+            rol=Cliente.CLIENTE,
+            nombre=request.user.username,
+            email=request.user.email,
+            cedula='0000000000',
+            fechanacimiento=timezone.now().date()
+        )
+        is_cliente = True
+        is_recepcionista = False
     
     context = {
         'is_cliente': is_cliente,
@@ -145,7 +149,7 @@ def home(request):
     
     return render(request, 'home.html', context)
 
-# Funciones auxiliares (pueden moverse a un archivo separado si se prefiere)
+# Funciones auxiliares
 def es_recepcionista(user):
     try:
         return user.cliente.is_recepcionista()
