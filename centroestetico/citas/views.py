@@ -4,24 +4,13 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import datetime, time
-from .models import Empleado, Cita, Cliente
-from .forms import CitaForm
 from django.core.mail import send_mail
 from django.conf import settings
+from .models import Empleado, Cita, Cliente, Servicio
+from .forms import CitaForm
 from .decorators import cliente_required, recepcionista_required
 
-def es_recepcionista(user):
-    try:
-        return user.cliente.is_recepcionista()
-    except Cliente.DoesNotExist:
-        return False
-
-def es_cliente(user):
-    try:
-        return user.cliente.is_cliente()
-    except Cliente.DoesNotExist:
-        return False
-
+# Vistas relacionadas con Citas
 @login_required
 @cliente_required
 def agendar_cita(request):
@@ -45,6 +34,47 @@ def agendar_cita(request):
         form = CitaForm()
     return render(request, 'cita.html', {'form': form})
 
+@login_required
+def ver_citas(request):
+    cliente = Cliente.objects.get(user=request.user)
+    citas = Cita.objects.filter(cliente=cliente).order_by('fecha', 'hora_inicio')
+    for cita in citas:
+        cita.estado = cita.estado_actual
+    return render(request, "cita.html", {"citas": citas})
+
+@login_required
+def cancelar_cita(request, cita_id):
+    cita = get_object_or_404(Cita, id=cita_id, cliente__user=request.user)
+    if cita.estado == Cita.ESTADO_CONFIRMADA:
+        cita.estado = Cita.ESTADO_CANCELADA
+        cita.save()
+        messages.success(request, "Cita cancelada exitosamente")
+    else:
+        messages.error(request, "No se puede cancelar esta cita")
+    return redirect('ver_citas')
+
+@login_required
+@recepcionista_required
+def gestion_citas(request):
+    fecha = request.GET.get("fecha")
+    if fecha:
+        fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
+        citas = Cita.objects.filter(fecha=fecha)
+    else:
+        fecha = timezone.now().date()
+        citas = Cita.objects.filter(fecha=fecha)
+
+    for cita in citas:
+        cita.estado = cita.estado_actual
+
+    empleados = Empleado.objects.all()
+    return render(
+        request,
+        "gestion_citas.html",
+        {"citas": citas, "empleados": empleados, "fecha": fecha},
+    )
+
+# Vistas relacionadas con Empleados
 def get_empleados_disponibles(request):
     servicio_id = request.GET.get('servicio')
     empleados = Empleado.objects.filter(servicios__id=servicio_id)
@@ -93,46 +123,7 @@ def get_bloques_disponibles(request):
     
     return JsonResponse({'bloques': bloques_disponibles})
 
-@login_required
-@recepcionista_required
-def gestion_citas(request):
-    fecha = request.GET.get("fecha")
-    if fecha:
-        fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
-        citas = Cita.objects.filter(fecha=fecha)
-    else:
-        fecha = timezone.now().date()
-        citas = Cita.objects.filter(fecha=fecha)
-
-    for cita in citas:
-        cita.estado = cita.estado_actual
-
-    empleados = Empleado.objects.all()
-    return render(
-        request,
-        "gestion_citas.html",
-        {"citas": citas, "empleados": empleados, "fecha": fecha},
-    )
-
-@login_required
-def ver_citas(request):
-    cliente = Cliente.objects.get(user=request.user)
-    citas = Cita.objects.filter(cliente=cliente).order_by('fecha', 'hora_inicio')
-    for cita in citas:
-        cita.estado = cita.estado_actual
-    return render(request, "cita.html", {"citas": citas})
-
-@login_required
-def cancelar_cita(request, cita_id):
-    cita = get_object_or_404(Cita, id=cita_id, cliente__user=request.user)
-    if cita.estado == Cita.ESTADO_CONFIRMADA:
-        cita.estado = Cita.ESTADO_CANCELADA
-        cita.save()
-        messages.success(request, "Cita cancelada exitosamente")
-    else:
-        messages.error(request, "No se puede cancelar esta cita")
-    return redirect('ver_citas')
-
+# Vista principal
 @login_required
 def home(request):
     try:
@@ -153,3 +144,16 @@ def home(request):
     }
     
     return render(request, 'home.html', context)
+
+# Funciones auxiliares (pueden moverse a un archivo separado si se prefiere)
+def es_recepcionista(user):
+    try:
+        return user.cliente.is_recepcionista()
+    except Cliente.DoesNotExist:
+        return False
+
+def es_cliente(user):
+    try:
+        return user.cliente.is_cliente()
+    except Cliente.DoesNotExist:
+        return False

@@ -1,8 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from datetime import timedelta
 from django.utils import timezone
-from django.db.models.signals import post_save
 
 class Cliente(models.Model):
     CLIENTE = 'CL'
@@ -42,7 +40,7 @@ class Empleado(models.Model):
     nombre = models.CharField(max_length=100)
     email = models.EmailField()
     celular = models.CharField(max_length=10)
-    servicios = models.ManyToManyField("Servicio", related_name="empleados")
+    servicios = models.ManyToManyField(Servicio, related_name="empleados")
 
     def __str__(self):
         return f"{self.nombre} ({self.cedula})"
@@ -57,14 +55,14 @@ class Cita(models.Model):
     ESTADO_TERMINADA = 4
 
     OPCIONES_ESTADO = [
-        (1, "Cita Cancelada"),
-        (2, "Cita Confirmada"),
-        (3, "En Proceso"),
-        (4, "Cita terminada")
+        (ESTADO_CANCELADA, "Cita Cancelada"),
+        (ESTADO_CONFIRMADA, "Cita Confirmada"),
+        (ESTADO_EN_PROCESO, "En Proceso"),
+        (ESTADO_TERMINADA, "Cita terminada")
     ]
-    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name="citas")
-    servicio = models.ForeignKey('Servicio', on_delete=models.CASCADE)
-    empleado = models.ForeignKey('Empleado', on_delete=models.CASCADE, related_name="empleados")
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="citas")
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
+    empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name="empleados")
     fecha = models.DateField(null=True, blank=True)
     hora_inicio = models.TimeField(null=True, blank=True)
     estado = models.IntegerField(choices=OPCIONES_ESTADO, default=ESTADO_CONFIRMADA)
@@ -102,13 +100,8 @@ class Cita(models.Model):
 
 class HorarioEmpleado(models.Model):
     OPCIONES_DIAS = [
-        (0, "Lunes"),
-        (1, "Martes"),
-        (2, "Miércoles"),
-        (3, "Jueves"),
-        (4, "Viernes"),
-        (5, "Sábado"),
-        (6, "Domingo"),
+        (0, "Lunes"), (1, "Martes"), (2, "Miércoles"), (3, "Jueves"),
+        (4, "Viernes"), (5, "Sábado"), (6, "Domingo"),
     ]
     empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name="horarios")
     dia_semana = models.IntegerField(choices=OPCIONES_DIAS)
@@ -124,13 +117,8 @@ class AusenciaEmpleado(models.Model):
 
 class HorarioCentro(models.Model):
     DIAS_SEMANA = [
-        (0, 'Lunes'),
-        (1, 'Martes'),
-        (2, 'Miércoles'),
-        (3, 'Jueves'),
-        (4, 'Viernes'),
-        (5, 'Sábado'),
-        (6, 'Domingo'),
+        (0, 'Lunes'), (1, 'Martes'), (2, 'Miércoles'), (3, 'Jueves'),
+        (4, 'Viernes'), (5, 'Sábado'), (6, 'Domingo'),
     ]
     dia = models.IntegerField(choices=DIAS_SEMANA, unique=True)
     hora_apertura = models.TimeField()

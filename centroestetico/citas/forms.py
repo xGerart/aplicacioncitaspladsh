@@ -1,8 +1,9 @@
 from django import forms
-from .models import Servicio, Empleado, Cliente, Cita
 from allauth.account.forms import SignupForm
 from django.db import transaction
+from .models import Servicio, Empleado, Cliente, Cita
 
+# Formulario relacionado con Citas
 class CitaForm(forms.ModelForm):
     servicio = forms.ModelChoiceField(
         queryset=Servicio.objects.all(),
@@ -33,6 +34,7 @@ class CitaForm(forms.ModelForm):
             except (ValueError, TypeError):
                 pass
 
+# Formulario relacionado con Clientes
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
@@ -41,6 +43,7 @@ class ClienteForm(forms.ModelForm):
             'fechanacimiento': forms.DateInput(attrs={'type': 'date'}),
         }
 
+# Formulario combinado para registro de usuario y cliente
 class CombinedSignupForm(SignupForm):
     cedula = forms.CharField(max_length=10, required=True)
     nombre = forms.CharField(max_length=100, required=True)
