@@ -26,8 +26,7 @@ SECRET_KEY = 'django-insecure-+cq5yf#v_+z#ov8u)om^jw66oj0s*!)4x1mib0&4%72!x^eak=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['gerart674.pythonanywhere.com']
 
 # Application definition
 
@@ -92,7 +91,7 @@ WSGI_APPLICATION = 'centroestetico.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.mysql',
-        'NAME':'gerart$aplicacioncitaspladsh',
+        'NAME':'gerart674$aplicacioncitaspladsh',
         'USER':'gerart674',
         'PASSWORD':'172503Gt',
         'HOST':'gerart674.mysql.pythonanywhere-services.com',
@@ -134,6 +133,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+STATIC_ROOT = '/home/tuusuario/aplicacioncitaspladsh/static'
 STATIC_URL = 'static/'
 
 # Default primary key field type
