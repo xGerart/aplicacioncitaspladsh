@@ -10,6 +10,7 @@ from .models import Empleado, Cita, Cliente, Servicio
 from .forms import CitaForm
 from .decorators import cliente_required, recepcionista_required
 import logging
+from django.core.exceptions import PermissionDenied
 
 # Vistas relacionadas con Citas
 @login_required
@@ -132,32 +133,43 @@ logger = logging.getLogger(__name__)
 def home(request):
     try:
         cliente = request.user.cliente
-        is_cliente = cliente.rol == Cliente.CLIENTE
-        is_recepcionista = cliente.rol == Cliente.RECEPCIONISTA
-        logger.info(f"Usuario: {request.user.username}, Rol (raw): {cliente.rol}, "
-                    f"Constante CLIENTE: {Cliente.CLIENTE}, Constante RECEPCIONISTA: {Cliente.RECEPCIONISTA}")
+        is_cliente = cliente_required(lambda r: True)(request)
+        is_recepcionista = recepcionista_required(lambda r: True)(request)
+        
+        if is_cliente:
+            rol = 'Cliente'
+        elif is_recepcionista:
+            rol = 'Recepcionista'
+        else:
+            rol = 'No asignado'
+
+        context = {
+            'is_cliente': is_cliente,
+            'is_recepcionista': is_recepcionista,
+            'rol': rol,
+            'rol_raw': cliente.rol,
+        }
+        
+        return render(request, 'home.html', context)
+    except PermissionDenied:
+        # Si se lanza PermissionDenied, significa que no tiene un rol válido
+        context = {
+            'is_cliente': False,
+            'is_recepcionista': False,
+            'rol': 'No asignado',
+            'rol_raw': 'N/A',
+        }
+        return render(request, 'home.html', context)
     except Cliente.DoesNotExist:
-        logger.warning(f"Cliente no existe para el usuario: {request.user.username}")
-        cliente = Cliente.objects.create(
-            user=request.user,
-            rol=Cliente.CLIENTE,
-            nombre=request.user.username,
-            email=request.user.email,
-            cedula='0000000000',
-            fechanacimiento=timezone.now().date()
-        )
-        is_cliente = True
-        is_recepcionista = False
-    
-    context = {
-        'is_cliente': is_cliente,
-        'is_recepcionista': is_recepcionista,
-        'rol': cliente.get_rol_display(),
-        'rol_raw': cliente.rol,
-    }
-    
-    logger.info(f"Contexto detallado para home: {context}")
-    return render(request, 'home.html', context)
+        # Manejo del caso en que el Cliente no existe
+        # Puedes crear un nuevo Cliente aquí si es necesario
+        context = {
+            'is_cliente': False,
+            'is_recepcionista': False,
+            'rol': 'No asignado',
+            'rol_raw': 'N/A',
+        }
+        return render(request, 'home.html', context)
 
 # Funciones auxiliares
 def es_recepcionista(user):
