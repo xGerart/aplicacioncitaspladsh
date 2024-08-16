@@ -126,43 +126,28 @@ def get_bloques_disponibles(request):
     return JsonResponse({'bloques': bloques_disponibles})
 
 # Vista principal
-
 logger = logging.getLogger(__name__)
 
 @login_required
 def home(request):
     try:
         cliente = request.user.cliente
-        is_cliente = cliente_required(lambda r: True)(request)
-        is_recepcionista = recepcionista_required(lambda r: True)(request)
+        is_cliente = cliente.is_cliente()
+        is_recepcionista = cliente.is_recepcionista()
         
-        if is_cliente:
-            rol = 'Cliente'
-        elif is_recepcionista:
-            rol = 'Recepcionista'
-        else:
-            rol = 'No asignado'
-
+        logger.info(f"Usuario: {request.user.username}, Rol: {cliente.rol}, "
+                    f"Is Cliente: {is_cliente}, Is Recepcionista: {is_recepcionista}")
+        
         context = {
             'is_cliente': is_cliente,
             'is_recepcionista': is_recepcionista,
-            'rol': rol,
+            'rol': cliente.get_rol_display(),
             'rol_raw': cliente.rol,
         }
         
         return render(request, 'home.html', context)
-    except PermissionDenied:
-        # Si se lanza PermissionDenied, significa que no tiene un rol válido
-        context = {
-            'is_cliente': False,
-            'is_recepcionista': False,
-            'rol': 'No asignado',
-            'rol_raw': 'N/A',
-        }
-        return render(request, 'home.html', context)
     except Cliente.DoesNotExist:
-        # Manejo del caso en que el Cliente no existe
-        # Puedes crear un nuevo Cliente aquí si es necesario
+        logger.warning(f"Cliente no existe para el usuario: {request.user.username}")
         context = {
             'is_cliente': False,
             'is_recepcionista': False,
@@ -170,7 +155,7 @@ def home(request):
             'rol_raw': 'N/A',
         }
         return render(request, 'home.html', context)
-
+    
 # Funciones auxiliares
 def es_recepcionista(user):
     try:
