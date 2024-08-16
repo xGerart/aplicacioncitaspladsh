@@ -144,7 +144,7 @@ def home(request):
             'rol': cliente.get_rol_display(),
             'rol_raw': cliente.rol,
         }
-        
+        logger.info(f"Contexto final: {context}")
         return render(request, 'home.html', context)
     except Cliente.DoesNotExist:
         logger.warning(f"Cliente no existe para el usuario: {request.user.username}")
