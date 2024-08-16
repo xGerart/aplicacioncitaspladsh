@@ -23,7 +23,7 @@ def es_cliente(user):
     except Cliente.DoesNotExist:
         return False
 
-@user_passes_test(es_cliente)
+#@user_passes_test(es_cliente)
 def agendar_cita(request):
     if request.method == 'POST':
         form = CitaForm(request.POST)
@@ -94,7 +94,7 @@ def get_bloques_disponibles(request):
     return JsonResponse({'bloques': bloques_disponibles})
 
 @login_required
-@user_passes_test(es_recepcionista)
+#@user_passes_test(es_recepcionista)
 def gestion_citas(request):
     fecha = request.GET.get("fecha")
     if fecha:
