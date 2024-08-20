@@ -132,29 +132,17 @@ logger = logging.getLogger(__name__)
 def home(request):
     try:
         cliente = request.user.cliente
-        is_cliente = cliente.is_cliente()
-        is_recepcionista = cliente.is_recepcionista()
-        
-        logger.info(f"Usuario: {request.user.username}, Rol: {cliente.rol}, "
-                    f"Is Cliente: {is_cliente}, Is Recepcionista: {is_recepcionista}")
-        
-        context = {
-            'is_cliente': is_cliente,
-            'is_recepcionista': is_recepcionista,
-            'rol': cliente.get_rol_display(),
-            'rol_raw': cliente.rol,
-        }
-        logger.info(f"Contexto final: {context}")
-        return render(request, 'home.html', context)
+        if cliente.is_cliente():
+            citas = Cita.objects.filter(cliente=cliente).order_by('fecha', 'hora_inicio')
+            return render(request, 'home_cliente.html', {'citas': citas})
+        elif cliente.is_recepcionista():
+            return render(request, 'home_recepcionista.html')
+        else:
+            logger.warning(f"Usuario {request.user.username} tiene un rol no reconocido: {cliente.rol}")
+            return render(request, 'error.html', {'message': 'Rol de usuario no reconocido'})
     except Cliente.DoesNotExist:
-        logger.warning(f"Cliente no existe para el usuario: {request.user.username}")
-        context = {
-            'is_cliente': False,
-            'is_recepcionista': False,
-            'rol': 'No asignado',
-            'rol_raw': 'N/A',
-        }
-        return render(request, 'home.html', context)
+        logger.error(f"No se encontró perfil de Cliente para el usuario {request.user.username}")
+        return render(request, 'error.html', {'message': 'Perfil de usuario no encontrado'})
     
 # Funciones auxiliares
 def es_recepcionista(user):

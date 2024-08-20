@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Bienvenido, {{ user.cliente.nombre }}</h1>
+    
+    <h2 class="mb-3">Mis Citas</h2>
+    {% if citas %}
+        <ul class="list-group mb-4">
+        {% for cita in citas %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ cita.servicio.nombre }} con {{ cita.empleado.nombre }} el {{ cita.fecha }} a las {{ cita.hora_inicio }}
+                <form method="post" action="{% url 'cancelar_cita' cita.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tienes citas programadas.</p>
+    {% endif %}
+    
+    <div class="text-center">
+        <a href="{% url 'agendar_cita' %}" class="btn btn-primary btn-lg">Agendar Nueva Cita</a>
+    </div>
+</div>
