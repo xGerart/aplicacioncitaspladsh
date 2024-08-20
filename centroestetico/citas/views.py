@@ -23,6 +23,9 @@ def agendar_cita(request):
             cita = form.save(commit=False)
             cita.cliente = request.user.cliente
             cita.servicio_id = request.POST.get('servicio_id')
+            
+            marcar_horario_no_disponible(cita.empleado, cita.fecha, cita.hora_inicio, cita.servicio.duracion)
+            
             cita.save()
             
             send_mail(
@@ -32,7 +35,7 @@ def agendar_cita(request):
                 [request.user.email],
                 fail_silently=False,
             )
-
+            
             messages.success(request, 'Cita agendada con éxito. Se ha enviado un correo de confirmación.')
             return redirect('home_cliente')
         else:
@@ -45,16 +48,51 @@ def agendar_cita(request):
     servicios = Servicio.objects.all()
     return render(request, 'cita.html', {'form': form, 'servicios': servicios})
 
+def marcar_horario_no_disponible(empleado, fecha, hora_inicio, duracion):
+    dia_semana = fecha.weekday()
+    hora_fin = (datetime.combine(fecha, hora_inicio) + timedelta(minutes=duracion)).time()
+
+    horario = HorarioEmpleado.objects.filter(
+        empleado=empleado,
+        dia_semana=dia_semana
+    ).first()
+
+    if horario:
+        horario.disponible = False
+        horario.save()
+
 @login_required
 def cancelar_cita(request, cita_id):
     cita = get_object_or_404(Cita, id=cita_id, cliente__user=request.user)
-    if cita.estado == Cita.ESTADO_CONFIRMADA:
+    if cita.es_cancelable():
+        empleado = cita.empleado
+        fecha = cita.fecha
+        hora_inicio = cita.hora_inicio
+        duracion = cita.servicio.duracion
+
         cita.estado = Cita.ESTADO_CANCELADA
         cita.save()
-        messages.success(request, "Cita cancelada exitosamente")
+
+        restaurar_disponibilidad_empleado(empleado, fecha, hora_inicio, duracion)
+
+        messages.success(request, "Cita cancelada exitosamente y disponibilidad del empleado actualizada")
     else:
         messages.error(request, "No se puede cancelar esta cita")
     return redirect('home_cliente')
+
+def restaurar_disponibilidad_empleado(empleado, fecha, hora_inicio, duracion):
+    dia_semana = fecha.weekday()
+    hora_fin = (datetime.combine(fecha, hora_inicio) + timedelta(minutes=duracion)).time()
+
+    horario = HorarioEmpleado.objects.filter(
+        empleado=empleado,
+        dia_semana=dia_semana
+    ).first()
+
+    if horario:
+
+        horario.disponible = True
+        horario.save()
 
 @login_required
 @recepcionista_required

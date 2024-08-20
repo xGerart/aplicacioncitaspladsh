@@ -125,6 +125,9 @@ class HorarioEmpleado(models.Model):
     hora_fin = models.TimeField()
     disponible = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ['empleado', 'dia_semana', 'hora_inicio', 'hora_fin']
+
 class AusenciaEmpleado(models.Model):
     empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name="ausencias")
     fecha_inicio = models.DateTimeField()
