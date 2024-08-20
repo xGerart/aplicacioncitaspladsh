@@ -1,22 +1,23 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block content %}
 <div class="container mt-5">
     <h2>Mis Citas</h2>
     {% if citas %}
-        <ul class="list-group">
         {% for cita in citas %}
-            <li class="list-group-item">
-                <h5>{{ cita.servicio.nombre }} con {{ cita.empleado.nombre }}</h5>
-                <p>Fecha: {{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora_inicio|time:"H:i" }}</p>
-                <p>Estado: {{ cita.get_estado_display }}</p>
-                {% if cita.es_cancelable %}
-                    <a href="{% url 'cancelar_cita' cita.id %}" class="btn btn-danger btn-sm">Cancelar Cita</a>
-                {% endif %}
-            </li>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ cita.servicio.nombre }} con {{ cita.empleado.nombre }}</h5>
+                    <p class="card-text">Fecha: {{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora_inicio|time:"H:i" }}</p>
+                    <p class="card-text">Estado: {{ cita.get_estado_display }}</p>
+                    {% if cita.estado == cita.ESTADO_CONFIRMADA and cita.es_cancelable %}
+                        <a href="{% url 'cancelar_cita' cita.id %}" class="btn btn-danger">Cancelar Cita</a>
+                    {% elif cita.estado == cita.ESTADO_CANCELADA %}
+                        <button class="btn btn-secondary" disabled>Cita Cancelada</button>
+                    {% endif %}
+                </div>
+            </div>
         {% endfor %}
-        </ul>
     {% else %}
         <p>No tienes citas programadas.</p>
     {% endif %}
