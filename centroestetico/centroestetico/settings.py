@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-+cq5yf#v_+z#ov8u)om^jw66oj0s*!)4x1mib0&4%72!x^eak=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
+STATIC_URL = "static/"
 
 # Application definition
 
@@ -161,30 +161,39 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = 'optional' #cambiar por 'mandatory' para que sea obligatorio la confirmación de correo
+ACCOUNT_EMAIL_VERIFICATION = 'optional' #tengo que cambiar por 'mandatory' para que sea obligatorio la confirmación de correo
 ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
 ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+## PYTHONANYWHERE
+
 ALLOWED_HOSTS = ["gerart674.pythonanywhere.com"]
-#ALLOWED_HOSTS = []
 
 DATABASES = {
-    "default": {
-         "ENGINE": "django.db.backends.mysql",
-        "NAME": "gerart674$default",
-         "USER": "gerart674",
+     "default": {
+          "ENGINE": "django.db.backends.mysql",
+         "NAME": "gerart674$default",
+          "USER": "gerart674",
          "PASSWORD": "172503Gt",
          "HOST": "gerart674.mysql.pythonanywhere-services.com",
-         "PORT": "3306",
-     }
- }
-
-# DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": BASE_DIR / "db.sqlite3",
-#         }
-#     }
+          "PORT": "3306",
+      }
+  }
 
 STATIC_ROOT = "/home/gerart674/aplicacioncitaspladsh/static"
-STATIC_URL = "static/"
+
+## DESARROLLO LOCAL
+
+# ALLOWED_HOSTS = []
+
+# DATABASES = {
+#          "default": {
+#              "ENGINE": "django.db.backends.sqlite3",
+#              "NAME": BASE_DIR / "db.sqlite3",
+#          }
+#      }
+
+

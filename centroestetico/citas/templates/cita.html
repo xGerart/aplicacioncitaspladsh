@@ -4,51 +4,63 @@
 
 {% block content %}
 <div class="container mt-5">
-    {% if citas %}
-        <h2 class="mb-4">Mis Citas</h2>
-        <ul class="list-group">
-        {% for cita in citas %}
-            <li class="list-group-item">
-                {{ cita.servicio.nombre }} con {{ cita.empleado.nombre }}
-                el {{ cita.fecha }} a las {{ cita.hora_inicio }}
-                - Estado: {{ cita.get_estado_display }}
-            </li>
-        {% empty %}
-            <li class="list-group-item">No tienes citas programadas.</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <h2 class="mb-4">Agendar Cita</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div id="paso1" class="mb-3">
-                <h3>Paso 1: Seleccionar Servicio</h3>
-                {{ form.servicio }}
-                <button type="button" id="continuarPaso1" class="btn btn-primary mt-2">Continuar</button>
+    <h2 class="mb-4">Agendar Cita</h2>
+    
+    <form method="post" id="citaForm">
+        {% csrf_token %}
+        
+        <div id="paso1" class="mb-3">
+            <h3>Paso 1: Seleccionar Servicio</h3>
+            <div class="row">
+                {% for servicio in servicios %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        {% if servicio.imagen %}
+                            <img src="{{ servicio.imagen.url }}" class="card-img-top" alt="{{ servicio.nombre }}">
+                        {% else %}
+                            <img src="{% static 'images/default-service.jpg' %}" class="card-img-top" alt="Imagen por defecto">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ servicio.nombre }}</h5>
+                            <p class="card-text">{{ servicio.descripcion }}</p>
+                            <p class="card-text">Precio: ${{ servicio.precio }}</p>
+                            <p class="card-text">Duración: {{ servicio.duracion }} minutos</p>
+                            <button type="button" class="btn btn-primary seleccionar-servicio" data-servicio-id="{{ servicio.id }}">Seleccionar</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            <div id="paso2" class="mb-3" style="display: none;">
-                <h3>Paso 2: Seleccionar Empleado</h3>
-                {{ form.empleado|as_crispy_field }}
-                <button type="button" id="continuarPaso2" class="btn btn-primary mt-2">Continuar</button>
-                <button type="button" id="volverPaso1" class="btn btn-secondary mt-2">Volver</button>
+        </div>
+
+        <div id="paso2" class="mb-3" style="display: none;">
+            <h3>Paso 2: Seleccionar Empleado</h3>
+            {{ form.empleado|as_crispy_field }}
+            <button type="button" id="continuarPaso2" class="btn btn-primary">Continuar</button>
+            <button type="button" id="volverPaso1" class="btn btn-secondary">Volver</button>
+        </div>
+
+        <div id="paso3" class="mb-3" style="display: none;">
+            <h3>Paso 3: Seleccionar Fecha</h3>
+            {{ form.fecha|as_crispy_field }}
+            <button type="button" id="continuarPaso3" class="btn btn-primary">Continuar</button>
+            <button type="button" id="volverPaso2" class="btn btn-secondary">Volver</button>
+        </div>
+
+        <div id="paso4" class="mb-3" style="display: none;">
+            <h3>Paso 4: Seleccionar Hora</h3>
+            <div id="bloquesHorarios" class="mb-3">
             </div>
-            <div id="paso3" class="mb-3" style="display: none;">
-                <h3>Paso 3: Seleccionar Fecha</h3>
-                {{ form.fecha|as_crispy_field }}
-                <button type="button" id="continuarPaso3" class="btn btn-primary mt-2">Continuar</button>
-                <button type="button" id="volverPaso2" class="btn btn-secondary mt-2">Volver</button>
-            </div>
-            <div id="paso4" class="mb-3" style="display: none;">
-                <h3>Paso 4: Seleccionar Hora</h3>
-                <div id="bloquesHorarios" class="mb-3"></div>
-                {{ form.hora_inicio }}
-                <button type="submit" class="btn btn-success mt-2">Agendar Cita</button>
-                <button type="button" id="volverPaso3" class="btn btn-secondary mt-2">Volver</button>
-            </div>
-        </form>
-    {% endif %}
+            {{ form.hora_inicio }}
+            <button type="submit" class="btn btn-success">Agendar Cita</button>
+            <button type="button" id="volverPaso3" class="btn btn-secondary">Volver</button>
+        </div>
+
+        <input type="hidden" name="servicio_id" id="servicio_id">
+    </form>
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <script src="{% static 'js/agendar_cita.js' %}"></script>
 {% endblock %}

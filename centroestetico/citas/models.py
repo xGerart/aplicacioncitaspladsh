@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from datetime import datetime
 
 class Cliente(models.Model):
     CLIENTE = 'CL'
@@ -37,6 +38,7 @@ class Servicio(models.Model):
     descripcion = models.TextField()
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     duracion = models.PositiveIntegerField()
+    imagen = models.ImageField(upload_to='servicios/', null=True, blank=True)
 
     def __str__(self):
         return self.nombre
@@ -47,6 +49,10 @@ class Empleado(models.Model):
     email = models.EmailField()
     celular = models.CharField(max_length=10)
     servicios = models.ManyToManyField(Servicio, related_name="empleados")
+
+    @classmethod
+    def get_cualquier_empleado(cls):
+        return cls(id=0, nombre="Cualquier profesional")
 
     def __str__(self):
         return f"{self.nombre} ({self.cedula})"
@@ -100,6 +106,10 @@ class Cita(models.Model):
             return self.ESTADO_TERMINADA
         else:
             return self.estado
+        
+    def es_cancelable(self):
+     fecha_hora_cita = timezone.make_aware(datetime.combine(self.fecha, self.hora_inicio))
+     return fecha_hora_cita > timezone.now()
 
     def __str__(self):
         return f"Cita de {self.cliente.nombre} para {self.servicio.nombre} el {self.fecha} a las {self.hora_inicio}"

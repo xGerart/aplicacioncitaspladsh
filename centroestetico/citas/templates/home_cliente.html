@@ -1,32 +1,25 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Bienvenido, {{ user.cliente.nombre }} {{ user.cliente.apellido }}</h1>
-
-    <h2 class="mb-3">Mis Citas</h2>
-
+    <h2>Mis Citas</h2>
     {% if citas %}
         <ul class="list-group">
         {% for cita in citas %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ cita.servicio.nombre }} con {{ cita.empleado.nombre }} el {{ cita.fecha }} a las {{ cita.hora_inicio }}
-                {% if cita.estado == cita.ESTADO_CANCELADA %}
-                    <span class="badge bg-secondary">Cancelada</span>
-                {% elif cita.estado == cita.ESTADO_CONFIRMADA %}
-                    <form method="post" action="{% url 'cancelar_cita' cita.id %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>
-                    </form>
-                {% else %}
-                    <span class="badge bg-primary">{{ cita.get_estado_display }}</span>
+            <li class="list-group-item">
+                <h5>{{ cita.servicio.nombre }} con {{ cita.empleado.nombre }}</h5>
+                <p>Fecha: {{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora_inicio|time:"H:i" }}</p>
+                <p>Estado: {{ cita.get_estado_display }}</p>
+                {% if cita.es_cancelable %}
+                    <a href="{% url 'cancelar_cita' cita.id %}" class="btn btn-danger btn-sm">Cancelar Cita</a>
                 {% endif %}
             </li>
         {% endfor %}
         </ul>
     {% else %}
-        <p class="text-center">No tienes citas programadas.</p>
+        <p>No tienes citas programadas.</p>
     {% endif %}
-
     <div class="text-center mt-4">
         <a href="{% url 'agendar_cita' %}" class="btn btn-primary btn-lg">Agendar Nueva Cita</a>
     </div>

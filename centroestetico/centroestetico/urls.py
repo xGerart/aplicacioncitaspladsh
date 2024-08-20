@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from citas import views as citas_views
 from . import views as main_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', main_views.home, name='home'),
@@ -35,3 +37,6 @@ urlpatterns = [
         path('cancelar/<int:cita_id>/', citas_views.cancelar_cita, name='cancelar_cita'),
     ])),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
