@@ -59,11 +59,13 @@ document.addEventListener('DOMContentLoaded', function() {
     volverPaso2.addEventListener('click', function() {
         paso3.style.display = 'none';
         paso2.style.display = 'block';
+        window.location.reload();
     });
 
     volverPaso3.addEventListener('click', function() {
         paso4.style.display = 'none';
         paso3.style.display = 'block';
+        window.location.reload();
     });
 
     function cargarEmpleados(servicioId) {
