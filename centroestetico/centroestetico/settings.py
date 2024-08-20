@@ -171,7 +171,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ## PYTHONANYWHERE
 
-# ALLOWED_HOSTS = ["gerart674.pythonanywhere.com"]
+ALLOWED_HOSTS = ["gerart674.pythonanywhere.com"]
 
 DATABASES = {
       "default": {
@@ -184,7 +184,7 @@ DATABASES = {
         }
   }
 
-# STATIC_ROOT = "/home/gerart674/aplicacioncitaspladsh/static"
+STATIC_ROOT = "/home/gerart674/aplicacioncitaspladsh/static"
 
 ## DESARROLLO LOCAL
 
