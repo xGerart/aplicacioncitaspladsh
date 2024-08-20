@@ -1,41 +1,19 @@
 from django import forms
 from allauth.account.forms import SignupForm
 from django.db import transaction
-from .models import Servicio, Empleado, Cliente, Cita
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import datetime
+from .models import Servicio, Empleado, Cliente, Cita
 
-# Formulario relacionado con Citas
 class CitaForm(forms.ModelForm):
-    empleado = forms.ModelChoiceField(
-        queryset=Empleado.objects.none(),
-        required=False
-    )
-    fecha = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date', 'id': 'id_fecha'})
-    )
-    hora_inicio = forms.TimeField(
-        widget=forms.HiddenInput()
-    )
+    empleado = forms.ModelChoiceField(queryset=Empleado.objects.none(), required=False)
+    fecha = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'id': 'id_fecha'}))
+    hora_inicio = forms.TimeField(widget=forms.HiddenInput(), required=False)
 
     class Meta:
         model = Cita
         fields = ['empleado', 'fecha', 'hora_inicio']
-
-    def clean(self):
-        cleaned_data = super().clean()
-        fecha = cleaned_data.get('fecha')
-        hora_inicio = cleaned_data.get('hora_inicio')
-
-        if fecha and hora_inicio:
-            ahora = timezone.localtime(timezone.now())
-            fecha_hora_cita = timezone.make_aware(datetime.combine(fecha, hora_inicio))
-
-            if fecha_hora_cita < ahora:
-                raise forms.ValidationError("No puedes agendar citas para fechas y horas pasadas.")
-
-        return cleaned_data
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,16 +24,22 @@ class CitaForm(forms.ModelForm):
             except (ValueError, TypeError):
                 pass
 
-# Formulario relacionado con Clientes
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha = cleaned_data.get('fecha')
+        hora_inicio = cleaned_data.get('hora_inicio')
+        if fecha and hora_inicio:
+            fecha_hora_cita = timezone.make_aware(datetime.combine(fecha, hora_inicio))
+            if fecha_hora_cita < timezone.now():
+                raise forms.ValidationError("No puedes agendar citas para fechas y horas pasadas.")
+        return cleaned_data
+
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
-        fields = ['cedula', 'nombre','apellido', 'email', 'celular', 'fechanacimiento']
-        widgets = {
-            'fechanacimiento': forms.DateInput(attrs={'type': 'date'}),
-        }
+        fields = ['cedula', 'nombre', 'apellido', 'email', 'celular', 'fechanacimiento']
+        widgets = {'fechanacimiento': forms.DateInput(attrs={'type': 'date'})}
 
-# Formulario combinado para registro de usuario y cliente
 class CombinedSignupForm(SignupForm):
     cedula = forms.CharField(max_length=10, required=True)
     nombre = forms.CharField(max_length=100, required=True)
@@ -71,13 +55,13 @@ class CombinedSignupForm(SignupForm):
 
     @transaction.atomic
     def save(self, request):
-        user = super(CombinedSignupForm, self).save(request)
+        user = super().save(request)
         user.username = self.cleaned_data['email']
         user.first_name = self.cleaned_data['nombre']
         user.last_name = self.cleaned_data['apellido']
         user.save()
         
-        cliente = Cliente.objects.create(
+        Cliente.objects.create(
             user=user,
             cedula=self.cleaned_data['cedula'],
             nombre=self.cleaned_data['nombre'],

@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
     volverPaso1.addEventListener('click', function() {
         paso2.style.display = 'none';
         paso1.style.display = 'block';
+        window.location.reload();
     });
 
     volverPaso2.addEventListener('click', function() {
@@ -89,9 +90,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const fecha = fechaInput.value;
         
         fetch(`/citas/get_bloques_disponibles/?empleado=${empleadoId}&servicio=${servicioId}&fecha=${fecha}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 bloquesContainer.innerHTML = '';
+                if (data.error) {
+                    throw new Error(data.error);
+                }
                 if (data.mensaje) {
                     const mensajeElement = document.createElement('p');
                     mensajeElement.textContent = data.mensaje;
@@ -123,8 +132,9 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error:', error);
+                bloquesContainer.innerHTML = '';
                 const mensajeError = document.createElement('p');
-                mensajeError.textContent = 'Hubo un problema al cargar los horarios disponibles. Por favor, intenta de nuevo.';
+                mensajeError.textContent = `Error: ${error.message}. Por favor, intenta de nuevo.`;
                 mensajeError.classList.add('alert', 'alert-danger');
                 bloquesContainer.appendChild(mensajeError);
             });

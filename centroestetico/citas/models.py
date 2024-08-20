@@ -134,6 +134,9 @@ class AusenciaEmpleado(models.Model):
     fecha_fin = models.DateTimeField()
     motivo = models.CharField(max_length=255, blank=True)
 
+    def __str__(self):
+        return f"Ausencia de {self.empleado.nombre} del {self.fecha_inicio} al {self.fecha_fin}"
+
 class HorarioCentro(models.Model):
     DIAS_SEMANA = [
         (0, 'Lunes'), (1, 'Martes'), (2, 'Miércoles'), (3, 'Jueves'),
