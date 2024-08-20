@@ -88,6 +88,9 @@ def get_bloques_disponibles(request):
     dia_semana = fecha.weekday()
     hora_actual = timezone.localtime(timezone.now()).time()
     
+    servicio = get_object_or_404(Servicio, id=servicio_id)
+    duracion_servicio = timedelta(minutes=servicio.duracion)
+    
     if empleado_id == '0':  # significa cualquier profesional
         empleados = Empleado.objects.filter(servicios__id=servicio_id)
     else:
@@ -97,8 +100,12 @@ def get_bloques_disponibles(request):
     for empleado in empleados:
         horario = HorarioEmpleado.objects.filter(empleado=empleado, dia_semana=dia_semana, disponible=True).first()
         if horario:
-            bloques = generar_bloques(horario.hora_inicio, horario.hora_fin)
-            todos_bloques.extend([(bloque[0], bloque[1], empleado) for bloque in bloques])
+            hora_inicio = datetime.combine(fecha, horario.hora_inicio)
+            hora_fin = datetime.combine(fecha, horario.hora_fin)
+            
+            while hora_inicio + duracion_servicio <= hora_fin:
+                todos_bloques.append((hora_inicio.time(), (hora_inicio + duracion_servicio).time(), empleado))
+                hora_inicio += timedelta(minutes=30)
     
     # obtengo todas las citas existentes para ese día y empleados
     citas_existentes = Cita.objects.filter(
@@ -125,14 +132,13 @@ def get_bloques_disponibles(request):
     
     return JsonResponse({'bloques': bloques_disponibles, 'mensaje': ''})
 
-def generar_bloques(hora_inicio, hora_fin, duracion=timedelta(minutes=30)):
+def generar_bloques(hora_inicio, hora_fin, duracion):
     bloques = []
     hora_actual = hora_inicio
-    while hora_actual < hora_fin:
+    while hora_actual + duracion <= hora_fin:
         hora_fin_bloque = (datetime.combine(date.today(), hora_actual) + duracion).time()
-        if hora_fin_bloque <= hora_fin:
-            bloques.append((hora_actual, hora_fin_bloque))
-        hora_actual = hora_fin_bloque
+        bloques.append((hora_actual, hora_fin_bloque))
+        hora_actual = (datetime.combine(date.today(), hora_actual) + timedelta(minutes=30)).time()
     return bloques
 
 # Vista principal
@@ -172,10 +178,8 @@ def login_success(request):
         elif cliente.is_recepcionista():
             return redirect('home_recepcionista')
         else:
-            # Manejar caso de rol desconocido
             return redirect('error_page')
     except Cliente.DoesNotExist:
-        # Manejar caso de usuario sin perfil de cliente
         return redirect('error_page')
     
 @login_required

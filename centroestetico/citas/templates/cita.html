@@ -10,22 +10,24 @@
         {% csrf_token %}
         
         <div id="paso1" class="mb-3">
-            <h3>Paso 1: Seleccionar Servicio</h3>
-            <div class="row">
+            <h3 class="mb-4">Seleccione un Servicio</h3>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
                 {% for servicio in servicios %}
-                <div class="col-md-4 mb-3">
-                    <div class="card">
-                        {% if servicio.imagen %}
-                            <img src="{{ servicio.imagen.url }}" class="card-img-top" alt="{{ servicio.nombre }}">
-                        {% else %}
-                            <img src="{% static 'images/default-service.jpg' %}" class="card-img-top" alt="Imagen por defecto">
-                        {% endif %}
-                        <div class="card-body">
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="ratio ratio-1x1">
+                            {% if servicio.imagen %}
+                            <img src="{{ servicio.imagen.url }}" class="card-img-top" alt="{{ servicio.nombre }}" style="object-fit: cover;">
+                            {% else %}
+                            <img src="{% static 'images/default-service.jpg' %}" class="card-img-top" alt="Imagen por defecto" style="object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="card-body d-flex flex-column">
                             <h5 class="card-title">{{ servicio.nombre }}</h5>
                             <p class="card-text">{{ servicio.descripcion }}</p>
-                            <p class="card-text">Precio: ${{ servicio.precio }}</p>
-                            <p class="card-text">Duración: {{ servicio.duracion }} minutos</p>
-                            <button type="button" class="btn btn-primary seleccionar-servicio" data-servicio-id="{{ servicio.id }}">Seleccionar</button>
+                            <p class="card-text"><strong>Precio:</strong> ${{ servicio.precio }}</p>
+                            <p class="card-text"><strong>Duración:</strong> {{ servicio.duracion }} minutos</p>
+                            <button class="btn btn-primary mt-auto seleccionar-servicio" data-servicio-id="{{ servicio.id }}">Seleccionar</button>
                         </div>
                     </div>
                 </div>
@@ -34,7 +36,7 @@
         </div>
 
         <div id="paso2" class="mb-3" style="display: none;">
-            <h3>Paso 2: Seleccionar Empleado</h3>
+            <h3>Seleccionar a un profesional:</h3>
             {{ form.empleado|as_crispy_field }}
             <button type="button" id="continuarPaso2" class="btn btn-primary">Continuar</button>
             <button type="button" id="volverPaso1" class="btn btn-secondary">Volver</button>

@@ -72,7 +72,7 @@ class CombinedSignupForm(SignupForm):
     @transaction.atomic
     def save(self, request):
         user = super(CombinedSignupForm, self).save(request)
-        user.username = self.cleaned_data['email']  # Asigna el email como username
+        user.username = self.cleaned_data['email']
         user.first_name = self.cleaned_data['nombre']
         user.last_name = self.cleaned_data['apellido']
         user.save()
