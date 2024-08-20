@@ -38,7 +38,7 @@ class CitaForm(forms.ModelForm):
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
-        fields = ['cedula', 'nombre', 'email', 'celular', 'fechanacimiento']
+        fields = ['cedula', 'nombre','apellido', 'email', 'celular', 'fechanacimiento']
         widgets = {
             'fechanacimiento': forms.DateInput(attrs={'type': 'date'}),
         }
@@ -47,25 +47,26 @@ class ClienteForm(forms.ModelForm):
 class CombinedSignupForm(SignupForm):
     cedula = forms.CharField(max_length=10, required=True)
     nombre = forms.CharField(max_length=100, required=True)
+    apellido = forms.CharField(max_length=100, required=True)
     celular = forms.CharField(max_length=10, required=True)
     fechanacimiento = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
     @transaction.atomic
     def save(self, request):
         user = super(CombinedSignupForm, self).save(request)
-        cliente, created = Cliente.objects.get_or_create(
+        user.first_name = self.cleaned_data['nombre']
+        user.last_name = self.cleaned_data['apellido']
+        user.username = ''  # Dejar el username en blanco
+        user.save()
+        
+        cliente = Cliente.objects.create(
             user=user,
-            defaults={
-                'cedula': self.cleaned_data.get('cedula'),
-                'nombre': self.cleaned_data.get('nombre'),
-                'email': self.cleaned_data.get('email'),
-                'celular': self.cleaned_data.get('celular'),
-                'fechanacimiento': self.cleaned_data.get('fechanacimiento'),
-                'rol': Cliente.CLIENTE
-            }
+            cedula=self.cleaned_data['cedula'],
+            nombre=self.cleaned_data['nombre'],
+            apellido=self.cleaned_data['apellido'],
+            email=self.cleaned_data['email'],
+            celular=self.cleaned_data['celular'],
+            fechanacimiento=self.cleaned_data['fechanacimiento'],
+            rol=Cliente.CLIENTE
         )
-        if not created: 
-            for field in ['cedula', 'nombre', 'email', 'celular', 'fechanacimiento']:
-                setattr(cliente, field, self.cleaned_data.get(field))
-            cliente.save()
         return user

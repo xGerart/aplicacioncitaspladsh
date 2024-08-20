@@ -12,6 +12,7 @@ class Cliente(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     cedula = models.CharField(max_length=10, unique=True)
     nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField()
     celular = models.CharField(max_length=10)
     fechanacimiento = models.DateField()

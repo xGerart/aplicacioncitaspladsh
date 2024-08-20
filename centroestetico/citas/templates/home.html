@@ -1,25 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center">Bienvenido a nuestro sistema de citas</h1>
-
-    <div class="debug-info" style="background-color: #f0f0f0; padding: 10px; margin-bottom: 20px;">
-        <p>Información de depuración:</p>
-        <p>Usuario: {{ user.username }}</p>
-        <p>Está autenticado: {{ user.is_authenticated }}</p>
-        <p>Es cliente: {{ is_cliente }}</p>
-        <p>Es recepcionista: {{ is_recepcionista }}</p>
-        <p>Rol (mostrado): {{ rol }}</p>
-        <p>Rol (raw): {{ rol_raw }}</p>
-    </div>
+    <h1 class="text-center mb-4">Bienvenido a nuestro sistema de citas</h1>
 
     {% if user.is_authenticated %}
-        {% if is_cliente %}
+        {% if user.cliente.rol == "CL" %}
             <div class="text-center mt-4">
-                <a href="{% url 'ver_citas' %}" class="btn btn-primary btn-lg">Ver Mis Citas</a>
+                <a href="{% url 'home_cliente' %}" class="btn btn-primary btn-lg me-2">Ver Mis Citas</a>
                 <a href="{% url 'agendar_cita' %}" class="btn btn-success btn-lg">Agendar Cita</a>
             </div>
-        {% elif is_recepcionista %}
+        {% elif user.cliente.rol == "RC" %}
             <div class="text-center mt-4">
                 <a href="{% url 'gestion_citas' %}" class="btn btn-primary btn-lg">Gestionar Citas</a>
             </div>

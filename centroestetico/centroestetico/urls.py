@@ -23,13 +23,15 @@ urlpatterns = [
     path('', main_views.home, name='home'),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
+    path('login-success/', citas_views.login_success, name='login_success'),
+    path('home-cliente/', citas_views.home_cliente, name='home_cliente'),
+    path('home-recepcionista/', citas_views.home_recepcionista, name='home_recepcionista'),
     
     path('citas/', include([
         path('agendar/', citas_views.agendar_cita, name='agendar_cita'),
         path('get_empleados_disponibles/', citas_views.get_empleados_disponibles, name='get_empleados_disponibles'),
         path('get_bloques_disponibles/', citas_views.get_bloques_disponibles, name='get_bloques_disponibles'),
         path('gestion_citas/', citas_views.gestion_citas, name='gestion_citas'),
-        path('ver/', citas_views.ver_citas, name='ver_citas'),
         path('cancelar/<int:cita_id>/', citas_views.cancelar_cita, name='cancelar_cita'),
     ])),
 ]

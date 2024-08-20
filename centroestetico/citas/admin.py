@@ -7,9 +7,9 @@ from django.contrib.auth.models import User
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'cedula', 'email', 'celular', 'rol')
+    list_display = ('nombre', 'apellido', 'cedula', 'email', 'celular', 'rol')
     list_filter = ('rol',)
-    search_fields = ('nombre', 'cedula', 'email')
+    search_fields = ('nombre', 'apellido', 'cedula', 'email')
 
 
 @admin.register(Servicio)

@@ -31,18 +31,10 @@ def agendar_cita(request):
             send_mail(subject, message, from_email, recipient_list, fail_silently=False)
             
             messages.success(request, 'Cita agendada con éxito. Se ha enviado un correo de confirmación.')
-            return redirect('ver_citas')
+            return redirect('home_cliente')
     else:
         form = CitaForm()
     return render(request, 'cita.html', {'form': form})
-
-@login_required
-def ver_citas(request):
-    cliente = Cliente.objects.get(user=request.user)
-    citas = Cita.objects.filter(cliente=cliente).order_by('fecha', 'hora_inicio')
-    for cita in citas:
-        cita.estado = cita.estado_actual
-    return render(request, "cita.html", {"citas": citas})
 
 @login_required
 def cancelar_cita(request, cita_id):
@@ -53,7 +45,7 @@ def cancelar_cita(request, cita_id):
         messages.success(request, "Cita cancelada exitosamente")
     else:
         messages.error(request, "No se puede cancelar esta cita")
-    return redirect('ver_citas')
+    return redirect('home_cliente')
 
 @login_required
 @recepcionista_required
@@ -130,12 +122,18 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def home(request):
+    logger.info(f"Usuario {request.user.username} accediendo a la vista home")
     try:
         cliente = request.user.cliente
+        logger.info(f"Cliente encontrado: {cliente.nombre}, Rol: {cliente.rol}")
+        
         if cliente.is_cliente():
+            logger.info(f"Usuario {request.user.username} identificado como cliente")
             citas = Cita.objects.filter(cliente=cliente).order_by('fecha', 'hora_inicio')
+            logger.info(f"Número de citas encontradas: {citas.count()}")
             return render(request, 'home_cliente.html', {'citas': citas})
         elif cliente.is_recepcionista():
+            logger.info(f"Usuario {request.user.username} identificado como recepcionista")
             return render(request, 'home_recepcionista.html')
         else:
             logger.warning(f"Usuario {request.user.username} tiene un rol no reconocido: {cliente.rol}")
@@ -143,7 +141,35 @@ def home(request):
     except Cliente.DoesNotExist:
         logger.error(f"No se encontró perfil de Cliente para el usuario {request.user.username}")
         return render(request, 'error.html', {'message': 'Perfil de usuario no encontrado'})
+    except Exception as e:
+        logger.exception(f"Error inesperado en la vista home para el usuario {request.user.username}")
+        return render(request, 'error.html', {'message': 'Ha ocurrido un error inesperado'})
+
+@login_required
+def login_success(request):
+    try:
+        cliente = request.user.cliente
+        if cliente.is_cliente():
+            return redirect('home_cliente')
+        elif cliente.is_recepcionista():
+            return redirect('home_recepcionista')
+        else:
+            # Manejar caso de rol desconocido
+            return redirect('error_page')
+    except Cliente.DoesNotExist:
+        # Manejar caso de usuario sin perfil de cliente
+        return redirect('error_page')
     
+@login_required
+def home_cliente(request):
+    cliente = request.user.cliente
+    citas = Cita.objects.filter(cliente=cliente).order_by('fecha', 'hora_inicio')
+    return render(request, 'home_cliente.html', {'citas': citas})
+
+@login_required
+def home_recepcionista(request):
+    return render(request, 'home_recepcionista.html')
+
 # Funciones auxiliares
 def es_recepcionista(user):
     try:
