@@ -107,7 +107,7 @@ def get_bloques_disponibles(request):
             
             while hora_inicio + duracion_servicio <= hora_fin:
                 todos_bloques.append((hora_inicio.time(), (hora_inicio + duracion_servicio).time(), empleado))
-                hora_inicio += duracion_servicio
+                hora_inicio += timedelta(minutes=30)
 
     citas_existentes = Cita.objects.filter(
         Q(empleado__in=empleados) | Q(empleado__isnull=True),
