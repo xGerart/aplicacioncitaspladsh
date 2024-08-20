@@ -25,6 +25,14 @@ def agendar_cita(request):
             cita.servicio_id = request.POST.get('servicio_id')
             cita.save()
             
+            send_mail(
+                'Confirmación de cita',
+                f'Su cita ha sido agendada para el {cita.fecha} a las {cita.hora_inicio}.',
+                'noreply@gerart674.pythonanywhere.com',
+                [request.user.email],
+                fail_silently=False,
+            )
+
             messages.success(request, 'Cita agendada con éxito. Se ha enviado un correo de confirmación.')
             return redirect('home_cliente')
         else:
