@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Confirm E-mail Address" %}{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3>{% trans "Confirm E-mail Address" %}</h3>
+                </div>
+                <div class="card-body">
+                    {% if confirmation %}
+                        <p>{% trans "Please confirm that" %} <a href="mailto:{{ email }}">{{ email }}</a> {% trans "is an e-mail address for user" %} {{ confirmation.email_address.user }}.</p>
+
+                        <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-block">{% trans "Confirm" %}</button>
+                        </form>
+                    {% else %}
+                        <p>{% trans "This confirmation link has expired or is invalid. Please request a new confirmation e-mail." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a href="{% url 'account_login' %}" class="btn btn-link">{% trans "Sign In" %}</a>
+                <a href="{% url 'account_signup' %}" class="btn btn-link">{% trans "Sign Up" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
