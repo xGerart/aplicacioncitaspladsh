@@ -1,28 +1,58 @@
 {% extends "base.html" %}
-
+{% load i18n %}
+{% load account socialaccount %}
 {% load crispy_forms_tags %}
 
-{% block title %}Login{% endblock %}
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header text-center">
-                    <h3>Inicio de Sesión</h3>
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">{% trans "Sign In" %}</h3>
                 </div>
                 <div class="card-body">
-                    <form method="post" action="{% url 'account_login' %}">
+                    {% get_providers as socialaccount_providers %}
+
+                    {% if socialaccount_providers %}
+                    <p class="text-center">{% blocktrans with site.name as site_name %}Please sign in with one
+                    of your existing third party accounts. Or, <a href="{{ signup_url }}">sign up</a>
+                    for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
+
+                    <div class="socialaccount_ballot">
+                        <ul class="socialaccount_providers list-unstyled">
+                            {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+                        </ul>
+                        <div class="login-or border-top border-bottom my-3">{% trans 'or' %}</div>
+                    </div>
+
+                    {% include "socialaccount/snippets/login_extra.html" %}
+
+                    {% else %}
+                    <p class="text-center">{% blocktrans %}Si no tienes una cuenta aún, por favor
+                    <a href="{{ signup_url }}">regístrate</a> primero.{% endblocktrans %}</p>
+                    {% endif %}
+
+                    <form class="login" method="POST" action="{% url 'account_login' %}">
                         {% csrf_token %}
                         {{ form|crispy }}
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+                        {% if redirect_field_value %}
+                        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                        {% endif %}
+                        <div class="d-grid gap-2 mt-3">
+                            <button class="btn btn-primary" type="submit">{% trans "Sign In" %}</button>
                         </div>
                     </form>
+
                     <div class="text-center mt-3">
-                        <p>¿No tienes una cuenta? <a href="{% url 'account_signup' %}">Regístrate aquí</a></p>
-                        <p><a href="{% url 'account_reset_password' %}">¿Olvidaste tu contraseña?</a></p>
+                        <p class="mb-1">
+                            <a href="{% url 'account_reset_password' %}" class="text-decoration-none">{% trans "Forgot Password?" %}</a>
+                        </p>
+                        <p class="mb-0">
+                            {% trans "No tienes una cuenta?" %} <a href="{{ signup_url }}" class="text-decoration-none">{% trans "Sign Up" %}</a>
+                        </p>
                     </div>
                 </div>
             </div>

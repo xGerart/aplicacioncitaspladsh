@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.views.decorators.http import require_GET
-from .models import Empleado, Cita, Cliente, Servicio, HorarioEmpleado, AusenciaEmpleado
+from .models import Empleado, Cita, Cliente, Servicio, HorarioEmpleado, HorarioCentro
 from .forms import CitaForm
 from .decorators import cliente_required, recepcionista_required
 
@@ -27,15 +27,8 @@ def agendar_cita(request):
            
             if cita.hora_inicio:
                 cita.save()
-                send_mail(
-                    'Confirmación de cita',
-                    f'Su cita ha sido agendada para el {cita.fecha} a las {cita.hora_inicio}.',
-                    'noreply@gerart674.pythonanywhere.com',
-                    [request.user.email],
-                    fail_silently=False,
-                )
-                messages.success(request, 'Cita agendada con éxito. Se ha enviado un correo de confirmación.')
-                return redirect('home_cliente')
+                messages.success(request, 'Cita agendada con éxito.')
+                return redirect('home')
             else:
                 messages.error(request, 'Por favor, seleccione una hora para la cita.')
         else:
@@ -46,7 +39,15 @@ def agendar_cita(request):
         form = CitaForm()
     
     servicios = Servicio.objects.all()
-    return render(request, 'cita.html', {'form': form, 'servicios': servicios})
+    horario_cierre = HorarioCentro.objects.get(dia=timezone.now().weekday()).hora_cierre
+    
+    print(f"Fecha actual: {timezone.now().date()}, Hora de cierre: {horario_cierre}")
+    
+    return render(request, 'cita.html', {
+        'form': form, 
+        'servicios': servicios,
+        'horario_cierre': horario_cierre.strftime('%H:%M')
+    })
 
 @login_required
 def cancelar_cita(request, cita_id):
@@ -57,7 +58,7 @@ def cancelar_cita(request, cita_id):
         messages.success(request, "Cita cancelada exitosamente")
     else:
         messages.error(request, "No se puede cancelar esta cita")
-    return redirect('home_cliente')
+    return redirect('home')
 
 @login_required
 @recepcionista_required
@@ -67,9 +68,7 @@ def gestion_citas(request):
         fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
     else:
         fecha = timezone.now().date()
-    citas = Cita.objects.filter(fecha=fecha)
-    for cita in citas:
-        cita.estado = cita.estado_actual
+    citas = Cita.objects.filter(fecha=fecha).select_related('cliente', 'servicio', 'empleado')
     empleados = Empleado.objects.all()
     return render(request, "gestion_citas.html", {"citas": citas, "empleados": empleados, "fecha": fecha})
 
@@ -83,6 +82,13 @@ def get_empleados_disponibles(request):
     }
     return JsonResponse(data)
 
+from django.utils import timezone
+from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from .models import Empleado, Servicio, Cita, HorarioEmpleado, HorarioCentro
+
 @require_GET
 def get_bloques_disponibles(request):
     empleado_id = request.GET.get('empleado')
@@ -91,60 +97,47 @@ def get_bloques_disponibles(request):
     
     fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
     dia_semana = fecha.weekday()
-    hora_actual = timezone.localtime(timezone.now()).time()
     
     servicio = get_object_or_404(Servicio, id=servicio_id)
-    duracion_servicio = timedelta(minutes=servicio.duracion)
-    
     empleados = [get_object_or_404(Empleado, id=empleado_id)] if empleado_id != '0' else Empleado.objects.filter(servicios__id=servicio_id)
     
-    todos_bloques = []
+    bloques_disponibles = []
     for empleado in empleados:
-        horario = empleado.horarios.filter(dia_semana=dia_semana).first()
+        horario = empleado.horarios.filter(dia_semana=dia_semana, disponible=True).first()
         if horario:
-            hora_inicio = datetime.combine(fecha, horario.hora_inicio)
-            hora_fin = datetime.combine(fecha, horario.hora_fin)
-            
-            while hora_inicio + duracion_servicio <= hora_fin:
-                todos_bloques.append((hora_inicio.time(), (hora_inicio + duracion_servicio).time(), empleado))
-                hora_inicio += timedelta(minutes=30)
+            hora_actual = horario.hora_inicio
+            while hora_actual < horario.hora_fin:
+                hora_fin_bloque = (datetime.combine(fecha, hora_actual) + timedelta(minutes=15)).time()
+                if hora_fin_bloque <= horario.hora_fin:
+                    # Verificar si el bloque está disponible
+                    if not Cita.objects.filter(
+                        empleado=empleado,
+                        fecha=fecha,
+                        hora_inicio__lt=hora_fin_bloque,
+                        hora_inicio__gte=hora_actual,
+                        estado__in=[Cita.ESTADO_CONFIRMADA, Cita.ESTADO_EN_PROCESO]
+                    ).exists():
+                        bloques_disponibles.append({
+                            'inicio': hora_actual.strftime('%H:%M'),
+                            'empleado_id': empleado.id,
+                            'empleado_nombre': empleado.nombre
+                        })
+                hora_actual = hora_fin_bloque
 
-    citas_existentes = Cita.objects.filter(
-        Q(empleado__in=empleados) | Q(empleado__isnull=True),
-        fecha=fecha,
-        estado__in=[Cita.ESTADO_CONFIRMADA, Cita.ESTADO_EN_PROCESO]
-    )
+    return JsonResponse({
+        'bloques': bloques_disponibles,
+        'mensaje': '' if bloques_disponibles else 'No hay horarios disponibles para este día.'
+    })
     
-    ausencias = AusenciaEmpleado.objects.filter(
-        empleado__in=empleados,
-        fecha_inicio__date__lte=fecha,
-        fecha_fin__date__gte=fecha
-    )
-    
-    bloques_disponibles = [
-        {
-            'inicio': bloque[0].strftime('%H:%M'),
-            'fin': bloque[1].strftime('%H:%M'),
-            'empleado_id': bloque[2].id,
-            'empleado_nombre': bloque[2].nombre
-        }
-        for bloque in todos_bloques
-        if not any(bloque[0] < cita.hora_fin and bloque[1] > cita.hora_inicio for cita in citas_existentes)
-        and not any(bloque[0] < ausencia.fecha_fin.time() and bloque[1] > ausencia.fecha_inicio.time() for ausencia in ausencias)
-        and (fecha != timezone.localtime(timezone.now()).date() or bloque[0] > hora_actual)
-    ]
-    
-    return JsonResponse({'bloques': bloques_disponibles, 'mensaje': '' if bloques_disponibles else 'No hay horarios disponibles para este día.'})
-
 @login_required
 def home(request):
     try:
         cliente = request.user.cliente
         if cliente.is_cliente():
             citas = Cita.objects.filter(cliente=cliente).order_by('fecha', 'hora_inicio')
-            return render(request, 'home_cliente.html', {'citas': citas})
+            return render(request, 'home.html', {'citas': citas})
         elif cliente.is_recepcionista():
-            return render(request, 'home_recepcionista.html')
+            return render(request, 'home.html')
         else:
             return render(request, 'error.html', {'message': 'Rol de usuario no reconocido'})
     except Cliente.DoesNotExist:
@@ -158,22 +151,18 @@ def login_success(request):
     try:
         cliente = request.user.cliente
         if cliente.is_cliente():
-            return redirect('home_cliente')
+            return redirect('home')
         elif cliente.is_recepcionista():
-            return redirect('home_recepcionista')
+            return redirect('home')
         else:
             return redirect('error_page')
     except Cliente.DoesNotExist:
         return redirect('error_page')
 
 @login_required
-def home_cliente(request):
-    citas = Cita.objects.filter(cliente=request.user.cliente).order_by('fecha', 'hora_inicio')
-    return render(request, 'home_cliente.html', {'citas': citas})
-
-@login_required
-def home_recepcionista(request):
-    return render(request, 'home_recepcionista.html')
+def ver_citas(request):
+    citas = Cita.objects.filter(cliente=request.user.cliente).select_related('servicio', 'empleado').order_by('fecha', 'hora_inicio')
+    return render(request, 'ver_citas.html', {'citas': citas})
 
 def es_recepcionista(user):
     try:
@@ -186,3 +175,36 @@ def es_cliente(user):
         return user.cliente.is_cliente()
     except Cliente.DoesNotExist:
         return False
+    
+@login_required
+@recepcionista_required
+def resumen_recepcionista(request):
+    now = timezone.localtime(timezone.now())
+    hoy = now.date()
+    ahora = now.time()
+    
+    citas_hoy = Cita.objects.filter(fecha=hoy).count()
+    proxima_cita = Cita.objects.filter(
+        fecha=hoy,
+        hora_inicio__gte=ahora,
+        estado=Cita.ESTADO_CONFIRMADA
+    ).select_related('cliente', 'servicio').order_by('hora_inicio').first()
+
+    data = {
+        'citas_hoy': citas_hoy,
+        'proxima_cita': None
+    }
+
+    if proxima_cita:
+        data['proxima_cita'] = {
+            'cliente': proxima_cita.cliente.nombre,
+            'servicio': proxima_cita.servicio.nombre,
+            'hora': proxima_cita.hora_inicio.strftime('%H:%M')
+        }
+
+    return JsonResponse(data)
+
+
+def get_current_time(request):
+    current_time = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M:%S')
+    return JsonResponse({'current_time': current_time})

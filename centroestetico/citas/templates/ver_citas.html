@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Mis Citas</h2>
+
+    {% if citas %}
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for cita in citas %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ cita.servicio.nombre }} con {{ cita.empleado.nombre }}</h5>
+                            <p class="card-text">
+                                <strong>Fecha:</strong> {{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora_inicio|time:"H:i" }}<br>
+                                <strong>Estado:</strong> 
+                                <span class="badge {% if cita.estado == cita.ESTADO_CONFIRMADA %}bg-success{% elif cita.estado == cita.ESTADO_CANCELADA %}bg-danger{% else %}bg-primary{% endif %}">
+                                    {{ cita.get_estado_display }}
+                                </span>
+                            </p>
+                            {% if cita.estado == cita.ESTADO_CONFIRMADA and cita.es_cancelable %}
+                                <a href="{% url 'cancelar_cita' cita.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?');">Cancelar Cita</a>
+                            {% elif cita.estado == cita.ESTADO_CANCELADA %}
+                                <p class="text-muted">Cita Cancelada</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No tienes citas programadas.
+        </div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="{% url 'agendar_cita' %}" class="btn btn-primary btn-lg">Agendar Nueva Cita</a>
+    </div>
+</div>
+{% endblock %}

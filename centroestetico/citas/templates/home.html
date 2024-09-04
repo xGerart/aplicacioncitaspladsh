@@ -1,26 +1,113 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Bienvenido a nuestro sistema de citas</h1>
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-4">Bienvenido a nuestro sistema de citas</h1>
+        <p class="lead">Agenda tus citas de belleza y bienestar de manera fácil y rápida.</p>
+    </div>
 
     {% if user.is_authenticated %}
         {% if user.cliente.rol == "CL" %}
-            <div class="text-center mt-4">
-                <a href="{% url 'home_cliente' %}" class="btn btn-primary btn-lg me-2">Ver Mis Citas</a>
-                <a href="{% url 'agendar_cita' %}" class="btn btn-success btn-lg">Agendar Cita</a>
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h2 class="card-title text-center mb-4">Panel de Cliente</h2>
+                            <div class="d-grid gap-3">
+                                <a href="{% url 'ver_citas' %}" class="btn btn-primary btn-lg">Ver Mis Citas</a>
+                                <a href="{% url 'agendar_cita' %}" class="btn btn-success btn-lg">Agendar Cita</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            {% if citas %}
+                <h3 class="text-center mb-4">Mis Próximas Citas</h3>
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    {% for cita in citas|slice:":4" %}
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ cita.servicio.nombre }} con {{ cita.empleado.nombre }}</h5>
+                                    <p class="card-text">
+                                        <strong>Fecha:</strong> {{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora_inicio|time:"H:i" }}<br>
+                                        <strong>Estado:</strong> 
+                                        <span class="badge {% if cita.estado == cita.ESTADO_CONFIRMADA %}bg-success{% elif cita.estado == cita.ESTADO_CANCELADA %}bg-danger{% else %}bg-primary{% endif %}">
+                                            {{ cita.get_estado_display }}
+                                        </span>
+                                    </p>
+                                    {% if cita.estado == cita.ESTADO_CONFIRMADA and cita.es_cancelable %}
+                                        <a href="{% url 'cancelar_cita' cita.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?');">Cancelar Cita</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if citas.count > 4 %}
+                    <div class="text-center mt-4">
+                        <a href="{% url 'home' %}" class="btn btn-outline-primary">Ver todas mis citas</a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    No tienes citas programadas. ¡Agenda tu primera cita ahora!
+                </div>
+            {% endif %}
+
         {% elif user.cliente.rol == "RC" %}
-            <div class="text-center mt-4">
-                <a href="{% url 'gestion_citas' %}" class="btn btn-primary btn-lg">Gestionar Citas</a>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="text-center mb-0">Bienvenido, {{ user.cliente.nombre }}</h2>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title text-center mb-4">Panel de Recepcionista</h3>
+                            <div class="d-grid gap-3">
+                                <a href="{% url 'gestion_citas' %}" class="btn btn-primary btn-lg">Gestionar Citas</a>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Citas de Hoy</h5>
+                                            <p class="card-text" id="citasHoy">Cargando...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Próxima Cita</h5>
+                                            <p class="card-text" id="proximaCita">Cargando...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         {% else %}
-            <p class="text-center mt-4">No tienes un rol asignado. Por favor, contacta al administrador.</p>
+            <div class="alert alert-warning" role="alert">
+                No tienes un rol asignado. Por favor, contacta al administrador.
+            </div>
         {% endif %}
     {% else %}
-        <p class="text-center mt-4">Por favor, inicia sesión para acceder a las funcionalidades.</p>
-        <div class="text-center mt-2">
-            <a href="{% url 'account_login' %}" class="btn btn-primary">Iniciar Sesión</a>
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <p class="mb-4">Por favor, inicia sesión para acceder a las funcionalidades.</p>
+                <a href="{% url 'account_login' %}" class="btn btn-primary btn-lg me-2 mb-2">Iniciar Sesión</a>
+                <a href="{% url 'account_signup' %}" class="btn btn-outline-primary btn-lg mb-2">Registrarse</a>
+            </div>
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
 {% endblock %}

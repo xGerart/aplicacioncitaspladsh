@@ -1,70 +1,70 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const paso1 = document.getElementById('paso1');
-    const paso2 = document.getElementById('paso2');
-    const paso3 = document.getElementById('paso3');
-    const paso4 = document.getElementById('paso4');
-    const continuarPaso2 = document.getElementById('continuarPaso2');
-    const continuarPaso3 = document.getElementById('continuarPaso3');
-    const volverPaso1 = document.getElementById('volverPaso1');
-    const volverPaso2 = document.getElementById('volverPaso2');
-    const volverPaso3 = document.getElementById('volverPaso3');
+    const pasos = [
+        document.getElementById('paso1'),
+        document.getElementById('paso2'),
+        document.getElementById('paso3'),
+        document.getElementById('paso4')
+    ];
+    const botones = {
+        continuar: [null, document.getElementById('continuarPaso2'), document.getElementById('continuarPaso3')],
+        volver: [null, document.getElementById('volverPaso1'), document.getElementById('volverPaso2'), document.getElementById('volverPaso3')]
+    };
     const servicioIdInput = document.getElementById('servicio_id');
     const empleadoSelect = document.getElementById('id_empleado');
     const fechaInput = document.getElementById('id_fecha');
     const horaInicioInput = document.getElementById('id_hora_inicio');
     const bloquesContainer = document.getElementById('bloquesHorarios');
     const servicioButtons = document.querySelectorAll('.seleccionar-servicio');
-    const hoy = new Date();
-    const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dd = String(hoy.getDate()).padStart(2, '0');
-    const fechaMinima = `${yyyy}-${mm}-${dd}`;
-    fechaInput.setAttribute('min', fechaMinima);
+    const progressBar = document.querySelector('.progress-bar');
+    const horarioCierre = document.getElementById('horario_cierre').value;
 
-    servicioButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const servicioId = this.getAttribute('data-servicio-id');
-            servicioIdInput.value = servicioId;
-            paso1.style.display = 'none';
-            paso2.style.display = 'block';
-            cargarEmpleados(servicioId);
+    // Configurar fecha mínima y máxima
+    function actualizarFechaMinima() {
+        fetch('/get_current_time/')
+            .then(response => response.json())
+            .then(data => {
+                const hoy = data.current_time.split(' ')[0];  // Obtiene solo la fecha
+                fechaInput.min = hoy;
+                
+                if (!fechaInput.value) {
+                    fechaInput.value = hoy;
+                }
+                
+                console.log('Fecha mínima actualizada:', hoy);
+            })
+            .catch(error => {
+                console.error('Error al obtener la hora actual:', error);
+            });
+    }
+
+    actualizarFechaMinima();
+    fechaInput.addEventListener('focus', actualizarFechaMinima);
+
+    function actualizarProgressBar(paso) {
+        const porcentaje = paso * 25;
+        progressBar.style.width = `${porcentaje}%`;
+        progressBar.setAttribute('aria-valuenow', porcentaje);
+        progressBar.textContent = `Paso ${paso}`;
+    }
+
+    function mostrarPaso(pasoActual) {
+        pasos.forEach((paso, index) => {
+            paso.style.display = index === pasoActual - 1 ? 'block' : 'none';
         });
-    });
+        actualizarProgressBar(pasoActual);
+    }
 
-    continuarPaso2.addEventListener('click', function() {
-        if (empleadoSelect.value) {
-            paso2.style.display = 'none';
-            paso3.style.display = 'block';
-        } else {
-            alert('Por favor, selecciona un empleado.');
-        }
-    });
-
-    continuarPaso3.addEventListener('click', function() {
-        if (fechaInput.value) {
-            paso3.style.display = 'none';
-            paso4.style.display = 'block';
-            cargarBloquesHorarios();
-        } else {
-            alert('Por favor, selecciona una fecha.');
-        }
-    });
-
-    volverPaso1.addEventListener('click', function() {
-        paso2.style.display = 'none';
-        paso1.style.display = 'block';
-        window.location.reload();
-    });
-
-    volverPaso2.addEventListener('click', function() {
-        paso3.style.display = 'none';
-        paso2.style.display = 'block';
-    });
-
-    volverPaso3.addEventListener('click', function() {
-        paso4.style.display = 'none';
-        paso3.style.display = 'block';
-    });
+    function mostrarAlerta(mensaje, tipo) {
+        const alertaExistente = document.querySelector('.alert');
+        if (alertaExistente) alertaExistente.remove();
+        const alerta = document.createElement('div');
+        alerta.className = `alert alert-${tipo} alert-dismissible fade show mt-3`;
+        alerta.innerHTML = `
+            ${mensaje}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        bloquesContainer.insertAdjacentElement('beforebegin', alerta);
+    }
 
     function cargarEmpleados(servicioId) {
         fetch(`/citas/get_empleados_disponibles/?servicio=${servicioId}`)
@@ -80,65 +80,104 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Hubo un problema al cargar los empleados. Por favor, intenta de nuevo.');
+                mostrarAlerta('Hubo un problema al cargar los empleados. Por favor, intenta de nuevo.', 'danger');
             });
     }
 
     function cargarBloquesHorarios() {
         const empleadoId = empleadoSelect.value;
-        const servicioId = document.getElementById('servicio_id').value;
+        const servicioId = servicioIdInput.value;
         const fecha = fechaInput.value;
         
-        fetch(`/citas/get_bloques_disponibles/?empleado=${empleadoId}&servicio=${servicioId}&fecha=${fecha}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
+        fetch('/get_current_time/')
+            .then(response => response.json())
             .then(data => {
-                bloquesContainer.innerHTML = '';
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                if (data.mensaje) {
-                    const mensajeElement = document.createElement('p');
-                    mensajeElement.textContent = data.mensaje;
-                    mensajeElement.classList.add('alert', 'alert-info');
-                    bloquesContainer.appendChild(mensajeElement);
-                } else if (data.bloques.length === 0) {
-                    const mensajeElement = document.createElement('p');
-                    mensajeElement.textContent = 'No hay horarios disponibles para este día.';
-                    mensajeElement.classList.add('alert', 'alert-info');
-                    bloquesContainer.appendChild(mensajeElement);
-                } else {
-                    data.bloques.forEach(bloque => {
-                        const button = document.createElement('button');
-                        button.type = 'button';
-                        button.classList.add('btn', 'btn-outline-primary', 'm-1');
-                        button.textContent = `${bloque.inicio} - ${bloque.fin}`;
-                        if (empleadoId === '0') {
-                            button.textContent += ` (${bloque.empleado_nombre})`;
+                const horaActual = data.current_time;
+                
+                fetch(`/citas/get_bloques_disponibles/?empleado=${empleadoId}&servicio=${servicioId}&fecha=${fecha}&hora_actual=${horaActual}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        bloquesContainer.innerHTML = '';
+                        if (data.error) throw new Error(data.error);
+                        if (data.mensaje) {
+                            mostrarAlerta(data.mensaje, 'info');
+                        } else if (data.bloques && data.bloques.length > 0) {
+                            const bloquesGrid = document.createElement('div');
+                            bloquesGrid.className = 'bloques-horarios-grid';
+                            data.bloques.forEach(bloque => {
+                                const button = document.createElement('button');
+                                button.type = 'button';
+                                button.className = 'btn btn-outline-primary bloque-horario';
+                                button.textContent = bloque.inicio;
+                                if (empleadoId === '0') {
+                                    button.title = bloque.empleado_nombre;
+                                }
+                                button.onclick = function() {
+                                    horaInicioInput.value = bloque.inicio;
+                                    document.getElementById('id_empleado').value = bloque.empleado_id;
+                                    bloquesGrid.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                                    button.classList.add('active');
+                                };
+                                bloquesGrid.appendChild(button);
+                            });
+                            bloquesContainer.appendChild(bloquesGrid);
+                        } else {
+                            mostrarAlerta('No hay horarios disponibles para este día.', 'info');
                         }
-                        button.onclick = function() {
-                            horaInicioInput.value = bloque.inicio;
-                            document.getElementById('id_empleado').value = bloque.empleado_id;
-                            bloquesContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                            button.classList.add('active');
-                        };
-                        bloquesContainer.appendChild(button);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        mostrarAlerta(`Error: ${error.message}. Por favor, intenta de nuevo.`, 'danger');
                     });
-                }
             })
             .catch(error => {
-                console.error('Error:', error);
-                bloquesContainer.innerHTML = '';
-                const mensajeError = document.createElement('p');
-                mensajeError.textContent = `Error: ${error.message}. Por favor, intenta de nuevo.`;
-                mensajeError.classList.add('alert', 'alert-danger');
-                bloquesContainer.appendChild(mensajeError);
+                console.error('Error al obtener la hora actual:', error);
+                mostrarAlerta('Error al cargar los horarios. Por favor, intenta de nuevo.', 'danger');
             });
     }
+
+    servicioButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const servicioId = this.getAttribute('data-servicio-id');
+            if (servicioIdInput) {
+                servicioIdInput.value = servicioId;
+                mostrarPaso(2);
+                cargarEmpleados(servicioId);
+            } else {
+                mostrarAlerta('Hubo un problema al seleccionar el servicio. Por favor, recarga la página e intenta de nuevo.', 'danger');
+            }
+        });
+    });
+
+    botones.continuar.forEach((boton, index) => {
+        if (boton) {
+            boton.addEventListener('click', function() {
+                const pasoActual = index + 1;
+                if (pasoActual === 2 && !empleadoSelect.value) {
+                    mostrarAlerta('Por favor, selecciona un empleado.', 'warning');
+                } else if (pasoActual === 3 && !fechaInput.value) {
+                    mostrarAlerta('Por favor, selecciona una fecha.', 'warning');
+                } else {
+                    mostrarPaso(pasoActual + 1);
+                    if (pasoActual === 3) cargarBloquesHorarios();
+                }
+            });
+        }
+    });
+
+    botones.volver.forEach((boton, index) => {
+        if (boton) {
+            boton.addEventListener('click', () => mostrarPaso(index));
+        }
+    });
+
     fechaInput.addEventListener('change', cargarBloquesHorarios);
     
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
 });

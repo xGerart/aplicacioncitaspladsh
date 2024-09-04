@@ -4,30 +4,32 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">Agendar Cita</h2>
-    
-    <form method="post" id="citaForm">
+    <h1 class="mb-4 text-center text-primary">Agendar Cita</h1>
+
+    <div class="progress mb-4" style="height: 30px;">
+        <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+            <span class="progress-text">Paso 1</span>
+        </div>
+    </div>
+
+    <form method="post">
         {% csrf_token %}
-        
-        <div id="paso1" class="mb-3">
-            <h3 class="mb-4">Seleccione un Servicio</h3>
-            <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        <div id="paso1" class="mb-5 fade-in">
+            <h3 class="mb-4 text-center">Seleccione un Servicio</h3>
+            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
                 {% for servicio in servicios %}
                 <div class="col">
-                    <div class="card h-100">
-                        <div class="ratio ratio-1x1">
-                            {% if servicio.imagen %}
-                            <img src="{{ servicio.imagen.url }}" class="card-img-top" alt="{{ servicio.nombre }}" style="object-fit: cover;">
-                            {% else %}
-                            <img src="{% static 'images/default-service.jpg' %}" class="card-img-top" alt="Imagen por defecto" style="object-fit: cover;">
-                            {% endif %}
-                        </div>
+                    <div class="card h-100 shadow-sm hover-effect">
+                        <img src="{% if servicio.imagen %}{{ servicio.imagen.url }}{% else %}{% static 'images/default-service.jpg' %}{% endif %}" class="card-img-top" alt="{{ servicio.nombre }}" style="height: 150px; object-fit: cover;">
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">{{ servicio.nombre }}</h5>
-                            <p class="card-text">{{ servicio.descripcion }}</p>
-                            <p class="card-text"><strong>Precio:</strong> ${{ servicio.precio }}</p>
-                            <p class="card-text"><strong>Duración:</strong> {{ servicio.duracion }} minutos</p>
-                            <button class="btn btn-primary mt-auto seleccionar-servicio" data-servicio-id="{{ servicio.id }}">Seleccionar</button>
+                            <p>{{ servicio.descripcion|truncatechars:50 }}</p>
+                            <div class="mt-auto">
+                                <p class="small">Precio: ${{ servicio.precio }}</p>
+                                <p class="small">Duración: {{ servicio.duracion }} min</p>
+                                <button type="button" class="btn btn-primary seleccionar-servicio" data-servicio-id="{{ servicio.id }}">Seleccionar</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -35,30 +37,48 @@
             </div>
         </div>
 
-        <div id="paso2" class="mb-3" style="display: none;">
-            <h3>Seleccionar a un profesional:</h3>
-            {{ form.empleado|as_crispy_field }}
-            <button type="button" id="continuarPaso2" class="btn btn-primary">Continuar</button>
-            <button type="button" id="volverPaso1" class="btn btn-secondary">Volver</button>
-        </div>
-
-        <div id="paso3" class="mb-3" style="display: none;">
-            <h3>Paso 3: Seleccionar Fecha</h3>
-            {{ form.fecha|as_crispy_field }}
-            <button type="button" id="continuarPaso3" class="btn btn-primary">Continuar</button>
-            <button type="button" id="volverPaso2" class="btn btn-secondary">Volver</button>
-        </div>
-
-        <div id="paso4" class="mb-3" style="display: none;">
-            <h3>Paso 4: Seleccionar Hora</h3>
-            <div id="bloquesHorarios" class="mb-3">
+        <div id="paso2" class="mb-5" style="display: none;">
+            <h3 class="mb-4 text-center">Seleccionar a un profesional</h3>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {{ form.empleado|as_crispy_field }}
+                    <div class="mt-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" id="volverPaso1">Volver</button>
+                        <button type="button" class="btn btn-primary" id="continuarPaso2">Continuar</button>
+                    </div>
+                </div>
             </div>
-            {{ form.hora_inicio }}
-            <button type="submit" class="btn btn-success">Agendar Cita</button>
-            <button type="button" id="volverPaso3" class="btn btn-secondary">Volver</button>
         </div>
 
-        <input type="hidden" name="servicio_id" id="servicio_id">
+        <div id="paso3" class="mb-5" style="display: none;">
+            <h3 class="mb-4 text-center">Seleccionar Fecha</h3>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {{ form.fecha|as_crispy_field }}
+                    <div class="mt-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" id="volverPaso2">Volver</button>
+                        <button type="button" class="btn btn-primary" id="continuarPaso3">Continuar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="paso4" class="mb-5" style="display: none;">
+            <h3 class="mb-4 text-center">Seleccionar Hora</h3>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div id="bloquesHorarios" class="mb-3"></div>
+                    {{ form.hora_inicio }}
+                    <div class="mt-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" id="volverPaso3">Volver</button>
+                        <button type="submit" class="btn btn-success">Agendar Cita</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" id="servicio_id" name="servicio_id">
+        <input type="hidden" id="horario_cierre" value="{{ horario_cierre }}">
     </form>
 </div>
 {% endblock %}

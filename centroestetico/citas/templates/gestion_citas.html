@@ -1,43 +1,47 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card">
                 <div class="card-header text-center">
-                    <h1>Gestión de Citas</h1>
-                    <div class="form-group mt-3">
-                        <form method="get">
-                            <label for="fecha">Seleccionar Fecha:</label>
-                            <input type="date" id="fecha" name="fecha" class="form-control" value="{{ fecha|date:'Y-m-d' }}">
-                            <button type="submit" class="btn btn-primary mt-2">Ver Citas</button>
-                        </form>
-                    </div>
+                    <h2 class="mb-0">Gestión de Citas</h2>
+                    <form class="mt-3" method="get">
+                        <div class="input-group">
+                            <input type="date" name="fecha" class="form-control" value="{{ fecha|date:'Y-m-d' }}" required>
+                            <button type="submit" class="btn btn-primary">Ver Citas</button>
+                        </div>
+                    </form>
                 </div>
                 <div class="card-body">
                     {% for empleado in empleados %}
-                    <h3>{{ empleado.nombre }}</h3>
-                    <ul class="list-group">
-                        {% for cita in citas %}
-                            {% if cita.empleado == empleado %}
-                            <li class="list-group-item">
-                                {{ cita.fecha|date:"d/m/Y" }} {{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}
-                                <br>Cliente: {{ cita.cliente.nombre }}
-                                <br>Servicio: {{ cita.servicio.nombre }}
-                                <br>Estado: 
-                                {% if cita.estado == cita.ESTADO_CONFIRMADA %}
-                                    <span class="badge bg-primary">Confirmada</span>
-                                {% elif cita.estado == cita.ESTADO_EN_PROCESO %}
-                                    <span class="badge bg-warning">En Proceso</span>
-                                {% elif cita.estado == cita.ESTADO_TERMINADA %}
-                                    <span class="badge bg-success">Terminada</span>
-                                {% elif cita.estado == cita.ESTADO_CANCELADA %}
-                                    <span class="badge bg-danger">Cancelada</span>
+                        <h3 class="mb-3">{{ empleado.nombre }}</h3>
+                        <div class="list-group mb-4">
+                            {% for cita in citas %}
+                                {% if cita.empleado == empleado %}
+                                    <div class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">{{ cita.fecha|date:"d/m/Y" }} {{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}</h5>
+                                            <small>
+                                                {% if cita.estado == cita.ESTADO_CONFIRMADA %}
+                                                    <span class="badge bg-primary">Confirmada</span>
+                                                {% elif cita.estado == cita.ESTADO_EN_PROCESO %}
+                                                    <span class="badge bg-warning text-dark">En Proceso</span>
+                                                {% elif cita.estado == cita.ESTADO_TERMINADA %}
+                                                    <span class="badge bg-success">Terminada</span>
+                                                {% elif cita.estado == cita.ESTADO_CANCELADA %}
+                                                    <span class="badge bg-danger">Cancelada</span>
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <p class="mb-1">Cliente: {{ cita.cliente.nombre }}</p>
+                                        <small>Servicio: {{ cita.servicio.nombre }}</small>
+                                    </div>
                                 {% endif %}
-                            </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
+                            {% endfor %}
+                        </div>
                     {% endfor %}
                 </div>
             </div>
@@ -48,9 +52,11 @@
 
 {% block extra_js %}
 <script>
-    document.getElementById('verCitas').addEventListener('click', function() {
-        var fecha = document.getElementById('fecha').value;
-        window.location.href = '{% url "gestion_citas" %}?fecha=' + fecha;
+    document.addEventListener('DOMContentLoaded', function() {
+        const fechaInput = document.querySelector('input[name="fecha"]');
+        fechaInput.addEventListener('change', function() {
+            this.form.submit();
+        });
     });
 </script>
 {% endblock %}
