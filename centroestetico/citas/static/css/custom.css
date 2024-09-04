@@ -79,6 +79,11 @@ body {
     border-color: darken(var(--danger-color), 10%);
 }
 
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
 .card {
     border: none;
     border-radius: 15px;
@@ -96,6 +101,20 @@ body {
     background-color: var(--primary-color);
     color: #ffffff;
     font-weight: 600;
+    border-bottom: none;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.card-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    font-size: 0.8rem;
 }
 
 .form-control {
@@ -110,42 +129,27 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
 }
 
-.progress {
-    height: 30px;
-    border-radius: 15px;
-    background-color: #e9ecef;
-    overflow: visible;
-}
-
-.progress-bar {
-    background-color: var(--primary-color);
-    transition: width 0.6s ease;
-    position: relative;
-    border-radius: 15px;
-}
-
-.progress-text {
-    position: absolute;
-    right: 5px;
-    color: white;
-    font-weight: bold;
-    line-height: 30px;
-}
-
 .alert {
     border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-.footer {
-    background-color: #ffffff !important;
-    border-top: 1px solid #e9ecef;
-    padding: 1rem 0;
+.alert-info {
+    background-color: #e3f2fd;
+    color: #0c5460;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
 }
 
 .badge {
     font-weight: 500;
-    padding: 0.5em 0.75em;
+    padding: 0.4em 0.6em;
     border-radius: 20px;
+    font-size: 0.8em;
 }
 
 .display-4 {
@@ -156,6 +160,12 @@ body {
 .lead {
     font-size: 1.25rem;
     font-weight: 300;
+}
+
+.footer {
+    background-color: #ffffff !important;
+    border-top: 1px solid #e9ecef;
+    padding: 1rem 0;
 }
 
 /* Animaciones */
@@ -172,24 +182,6 @@ body {
 .card-img-top {
     height: 150px;
     object-fit: cover;
-}
-
-.card-body {
-    padding: 1rem;
-}
-
-.card-title {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.card-text {
-    font-size: 0.8rem;
-}
-
-.btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
 }
 
 .hover-effect:hover {
@@ -211,6 +203,49 @@ body {
     color: white;
 }
 
+/* Estilo Resumen */
+#resumenCita .card-body {
+    padding: 2rem;
+}
+
+#resumenCita .fas {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+#resumenCita hr {
+    margin: 1.5rem 0;
+    border-color: #e0e0e0;
+}
+
+#resumenCita .text-primary {
+    color: var(--primary-color) !important;
+}
+
+#resumenCita h4 {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+}
+
+/* Estilos para SweetAlert */
+.swal2-popup {
+    font-size: 1rem !important;
+    font-family: 'Roboto', sans-serif;
+}
+
+.swal2-title {
+    font-size: 1.5em !important;
+}
+
+.swal2-content {
+    font-size: 1em !important;
+}
+
+.swal2-styled {
+    font-size: 1em !important;
+    padding: 0.5em 1.5em !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .container {
@@ -221,5 +256,10 @@ body {
     .btn {
         width: 100%;
         margin-bottom: 0.5rem;
+    }
+
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
     }
 }

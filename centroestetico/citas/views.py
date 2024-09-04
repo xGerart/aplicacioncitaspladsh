@@ -179,32 +179,36 @@ def es_cliente(user):
 @login_required
 @recepcionista_required
 def resumen_recepcionista(request):
+  try:
     now = timezone.localtime(timezone.now())
     hoy = now.date()
     ahora = now.time()
     
     citas_hoy = Cita.objects.filter(fecha=hoy).count()
     proxima_cita = Cita.objects.filter(
-        fecha=hoy,
-        hora_inicio__gte=ahora,
-        estado=Cita.ESTADO_CONFIRMADA
+      fecha=hoy,
+      hora_inicio__gte=ahora,
+      estado=Cita.ESTADO_CONFIRMADA
     ).select_related('cliente', 'servicio').order_by('hora_inicio').first()
 
     data = {
-        'citas_hoy': citas_hoy,
-        'proxima_cita': None
+      'citas_hoy': citas_hoy,
+      'proxima_cita': None
     }
 
     if proxima_cita:
-        data['proxima_cita'] = {
-            'cliente': proxima_cita.cliente.nombre,
-            'servicio': proxima_cita.servicio.nombre,
-            'hora': proxima_cita.hora_inicio.strftime('%H:%M')
-        }
-
+      data['proxima_cita'] = {
+        'cliente': proxima_cita.cliente.nombre,
+        'servicio': proxima_cita.servicio.nombre,
+        'hora': proxima_cita.hora_inicio.strftime('%H:%M')
+      }
+    print("Data enviada:", data)
     return JsonResponse(data)
-
+  except Exception as e:
+    print(f"Error en resumen_recepcionista: {str(e)}")
+    return JsonResponse({'error': str(e)}, status=500)
+  
 
 def get_current_time(request):
-    current_time = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M:%S')
+    current_time = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
     return JsonResponse({'current_time': current_time})

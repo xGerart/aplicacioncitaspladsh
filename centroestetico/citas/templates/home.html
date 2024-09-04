@@ -54,7 +54,7 @@
                 {% endif %}
             {% else %}
                 <div class="alert alert-info" role="alert">
-                    No tienes citas programadas. ¡Agenda tu primera cita ahora!
+                    ¿No tienes citas programadas? ¡Agenda tu primera cita ahora!
                 </div>
             {% endif %}
 
@@ -110,4 +110,14 @@
 {% endblock %}
 
 {% block extra_js %}
+{% if user.is_authenticated and user.cliente.rol == "RC" %}
+<script src="{% static 'js/home_recepcionista.js' %}"></script>
+<script>
+  console.log("Script de recepcionista cargado");
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM cargado, llamando a cargarResumen");
+    cargarResumen();
+  });
+</script>
+{% endif %}
 {% endblock %}

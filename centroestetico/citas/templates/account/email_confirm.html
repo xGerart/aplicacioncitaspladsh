@@ -1,22 +1,24 @@
 {% extends "base.html" %}
-
+{% load i18n %}
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-center">Confirmar dirección de correo electrónico</h2>
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">{% trans "Confirmar dirección de correo electrónico" %}</h3>
                 </div>
                 <div class="card-body">
                     {% if confirmation %}
-                        <p>Por favor, confirma que <a href="mailto:{{ email }}">{{ email }}</a> es tu dirección de correo electrónico.</p>
+                        <p class="text-center">Por favor, confirma que <a href="mailto:{{ email }}">{{ email }}</a> es tu dirección de correo electrónico.</p>
                         <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-primary btn-block">Confirmar</button>
+                            <div class="d-grid gap-2 mt-3">
+                                <button type="submit" class="btn btn-primary">{% trans "Confirmar" %}</button>
+                            </div>
                         </form>
                     {% else %}
-                        <p>Este enlace de confirmación ha expirado o es inválido. Por favor, solicita un nuevo correo de confirmación.</p>
+                        <p class="text-center">Este enlace de confirmación ha expirado o es inválido. Por favor, solicita un nuevo correo de confirmación.</p>
                     {% endif %}
                 </div>
             </div>

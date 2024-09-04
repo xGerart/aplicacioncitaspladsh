@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block content %}
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card">
                 <div class="card-header text-center">
                     <h2 class="mb-0">Gestión de Citas</h2>
-                    <form class="mt-3" method="get">
-                        <div class="input-group">
-                            <input type="date" name="fecha" class="form-control" value="{{ fecha|date:'Y-m-d' }}" required>
-                            <button type="submit" class="btn btn-primary">Ver Citas</button>
-                        </div>
-                    </form>
+                    <div class="input-group mt-3">
+                        <input type="date" id="fecha" class="form-control" value="{{ fecha|date:'Y-m-d' }}">
+                        <button class="btn btn-primary" type="button" onclick="verCitas()">Ver Citas</button>
+                    </div>
                 </div>
+
                 <div class="card-body">
-                    {% for empleado in empleados %}
-                        <h3 class="mb-3">{{ empleado.nombre }}</h3>
-                        <div class="list-group mb-4">
-                            {% for cita in citas %}
-                                {% if cita.empleado == empleado %}
-                                    <div class="list-group-item list-group-item-action">
+                    {% if citas %}
+                        {% regroup citas by empleado as citas_por_empleado %}
+                        {% for empleado in citas_por_empleado %}
+                            <h3 class="mb-3">{{ empleado.grouper.nombre }}</h3>
+                            <ul class="list-group mb-4">
+                                {% for cita in empleado.list %}
+                                    <li class="list-group-item list-group-item-action">
                                         <div class="d-flex w-100 justify-content-between">
                                             <h5 class="mb-1">{{ cita.fecha|date:"d/m/Y" }} {{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}</h5>
                                             <small>
@@ -38,25 +38,32 @@
                                         </div>
                                         <p class="mb-1">Cliente: {{ cita.cliente.nombre }}</p>
                                         <small>Servicio: {{ cita.servicio.nombre }}</small>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center mt-3">No hay citas para esta fecha.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    function verCitas() {
+        var fecha = document.getElementById('fecha').value;
+        window.location.href = "{% url 'gestion_citas' %}?fecha=" + fecha;
+    }
+
+    // Establecer la fecha actual por defecto al cargar la página
     document.addEventListener('DOMContentLoaded', function() {
-        const fechaInput = document.querySelector('input[name="fecha"]');
-        fechaInput.addEventListener('change', function() {
-            this.form.submit();
-        });
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha').value = today;
     });
 </script>
 {% endblock %}

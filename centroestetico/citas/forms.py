@@ -25,14 +25,16 @@ class CitaForm(forms.ModelForm):
                 pass
 
     def clean(self):
-        cleaned_data = super().clean()
-        fecha = cleaned_data.get('fecha')
-        hora_inicio = cleaned_data.get('hora_inicio')
-        if fecha and hora_inicio:
-            fecha_hora_cita = timezone.make_aware(datetime.combine(fecha, hora_inicio))
-            if fecha_hora_cita < timezone.now():
-                raise forms.ValidationError("No puedes agendar citas para fechas y horas pasadas.")
-        return cleaned_data
+     cleaned_data = super().clean()
+     fecha = cleaned_data.get('fecha')
+     hora_inicio = cleaned_data.get('hora_inicio')
+     if fecha and not hora_inicio:
+        raise forms.ValidationError("Por favor, selecciona una hora para la cita.")
+     if fecha and hora_inicio:
+        fecha_hora_cita = timezone.make_aware(datetime.combine(fecha, hora_inicio))
+        if fecha_hora_cita < timezone.now():
+            raise forms.ValidationError("No puedes agendar citas para fechas y horas pasadas.")
+     return cleaned_data
 
 class ClienteForm(forms.ModelForm):
     class Meta:
@@ -45,7 +47,7 @@ class CombinedSignupForm(SignupForm):
     nombre = forms.CharField(max_length=100, required=True)
     apellido = forms.CharField(max_length=100, required=True)
     celular = forms.CharField(max_length=10, required=True)
-    fechanacimiento = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    fechanacimiento = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}),label="Fecha de nacimiento")
 
     def clean_email(self):
         email = self.cleaned_data['email']

@@ -15,43 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const horaInicioInput = document.getElementById('id_hora_inicio');
     const bloquesContainer = document.getElementById('bloquesHorarios');
     const servicioButtons = document.querySelectorAll('.seleccionar-servicio');
-    const progressBar = document.querySelector('.progress-bar');
-    const horarioCierre = document.getElementById('horario_cierre').value;
-
-    // Configurar fecha mínima y máxima
-    function actualizarFechaMinima() {
-        fetch('/get_current_time/')
-            .then(response => response.json())
-            .then(data => {
-                const hoy = data.current_time.split(' ')[0];  // Obtiene solo la fecha
-                fechaInput.min = hoy;
-                
-                if (!fechaInput.value) {
-                    fechaInput.value = hoy;
-                }
-                
-                console.log('Fecha mínima actualizada:', hoy);
-            })
-            .catch(error => {
-                console.error('Error al obtener la hora actual:', error);
-            });
-    }
-
-    actualizarFechaMinima();
-    fechaInput.addEventListener('focus', actualizarFechaMinima);
-
-    function actualizarProgressBar(paso) {
-        const porcentaje = paso * 25;
-        progressBar.style.width = `${porcentaje}%`;
-        progressBar.setAttribute('aria-valuenow', porcentaje);
-        progressBar.textContent = `Paso ${paso}`;
-    }
+    const resumenCita = document.getElementById('resumenCita');
 
     function mostrarPaso(pasoActual) {
         pasos.forEach((paso, index) => {
             paso.style.display = index === pasoActual - 1 ? 'block' : 'none';
         });
-        actualizarProgressBar(pasoActual);
     }
 
     function mostrarAlerta(mensaje, tipo) {
@@ -139,6 +108,76 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    function actualizarResumen() {
+        const servicioElement = document.querySelector(`.seleccionar-servicio[data-servicio-id="${servicioIdInput.value}"]`);
+        if (!servicioElement) {
+            console.error('No se pudo encontrar el elemento del servicio');
+            return;
+        }
+    
+        const cardElement = servicioElement.closest('.card');
+        if (!cardElement) {
+            console.error('No se pudo encontrar el elemento card del servicio');
+            return;
+        }
+    
+        const servicio = cardElement.querySelector('.card-title')?.textContent || 'No especificado';
+        const empleado = empleadoSelect.options[empleadoSelect.selectedIndex]?.text || 'No especificado';
+        const fecha = fechaInput.value || 'No especificada';
+        const hora = horaInicioInput.value || 'No especificada';
+    
+        const duracionElement = cardElement.querySelector('.mt-auto p:nth-child(2)');
+        const duracion = duracionElement ? duracionElement.textContent.match(/\d+/)[0] : 'No especificada';
+    
+        const precioElement = cardElement.querySelector('.mt-auto p:nth-child(1)');
+        const precio = precioElement ? precioElement.textContent.match(/\$(\d+)/)[1] : 'No especificado';
+    
+        resumenCita.innerHTML = `
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Resumen de tu cita</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <i class="fas fa-calendar-alt text-primary"></i>
+                            <strong>Fecha:</strong> ${fecha}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <i class="fas fa-clock text-primary"></i>
+                            <strong>Hora:</strong> ${hora}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <i class="fas fa-cut text-primary"></i>
+                            <strong>Servicio:</strong> ${servicio}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <i class="fas fa-user text-primary"></i>
+                            <strong>Profesional:</strong> ${empleado}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <i class="fas fa-hourglass-half text-primary"></i>
+                            <strong>Duración:</strong> ${duracion} minutos
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h4 class="text-end">
+                                <strong>Total:</strong> 
+                                <span class="text-primary">$${precio}</span>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     servicioButtons.forEach(button => {
         button.addEventListener('click', function() {
             const servicioId = this.getAttribute('data-servicio-id');
@@ -160,9 +199,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     mostrarAlerta('Por favor, selecciona un empleado.', 'warning');
                 } else if (pasoActual === 3 && !fechaInput.value) {
                     mostrarAlerta('Por favor, selecciona una fecha.', 'warning');
+                } else if (pasoActual === 3 && !horaInicioInput.value) {
+                    mostrarAlerta('Por favor, selecciona una hora.', 'warning');
                 } else {
+                    if (pasoActual === 3) {
+                        actualizarResumen();
+                    }
                     mostrarPaso(pasoActual + 1);
-                    if (pasoActual === 3) cargarBloquesHorarios();
                 }
             });
         }
@@ -175,9 +218,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     fechaInput.addEventListener('change', cargarBloquesHorarios);
-    
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
 });
