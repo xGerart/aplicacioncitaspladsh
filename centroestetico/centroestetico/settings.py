@@ -184,7 +184,7 @@ DATABASES = {
           }
     }
 
-# STATIC_ROOT = "/home/gerart674/aplicacioncitaspladsh/static"
+STATIC_ROOT = "/home/gerart674/aplicacioncitaspladsh/static"
 
 ## DESARROLLO LOCAL
 
