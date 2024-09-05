@@ -71,15 +71,11 @@ def agendar_cita(request):
 
     print(f"Fecha actual: {timezone.now().date()}, Hora de cierre: {horario_cierre}")
 
-    return render(
-        request,
-        "cita.html",
-        {
-            "form": form,
-            "servicios": servicios,
-            "horario_cierre": horario_cierre.strftime("%H:%M"),
-        },
-    )
+    return render(request, 'cita.html', {
+        'form': form, 
+        'servicios': servicios,
+        'horario_cierre': horario_cierre.strftime('%H:%M')
+    })
 
 
 @login_required
