@@ -67,15 +67,23 @@ def agendar_cita(request):
         form = CitaForm()
 
     servicios = Servicio.objects.all()
-    horario_cierre = HorarioCentro.objects.get(dia=timezone.now().weekday()).hora_cierre
+    try:
+        horario_cierre = HorarioCentro.objects.get(dia=timezone.now().weekday()).hora_cierre
+    except HorarioCentro.DoesNotExist:
+        messages.error(request, "No se encontró el horario del centro para el día de hoy.")
+        horario_cierre = None
 
     print(f"Fecha actual: {timezone.now().date()}, Hora de cierre: {horario_cierre}")
 
-    return render(request, 'cita.html', {
-        'form': form, 
-        'servicios': servicios,
-        'horario_cierre': horario_cierre.strftime('%H:%M')
-    })
+    return render(
+        request,
+        "cita.html",
+        {
+            "form": form,
+            "servicios": servicios,
+            "horario_cierre": horario_cierre.strftime("%H:%M"),
+        },
+    )
 
 
 @login_required
