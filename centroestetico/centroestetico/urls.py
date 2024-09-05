@@ -19,6 +19,8 @@ urlpatterns = [
         path('gestion_citas/', citas_views.gestion_citas, name='gestion_citas'),
         path('cancelar/<int:cita_id>/', citas_views.cancelar_cita, name='cancelar_cita'),
         path('resumen_recepcionista/', citas_views.resumen_recepcionista, name='resumen_recepcionista'),
+        path('estadisticas/', citas_views.estadisticas, name='estadisticas'),
+        path('estadisticas_pdf/', citas_views.estadisticas_pdf, name='estadisticas_pdf'),
     ])),
     path('get_current_time/', citas_views.get_current_time, name='get_current_time'),
 ]

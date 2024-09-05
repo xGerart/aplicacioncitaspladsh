@@ -157,6 +157,15 @@ EMAIL_HOST_PASSWORD = "roze slfn mcnh nmmw"
 
 ACCOUNT_FORMS = {"signup": "citas.forms.CombinedSignupForm"}
 
+ACCOUNT_EMAIL_CONFIRMATION_HMAC = True
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Centro Estético Pladsh] "
+ACCOUNT_EMAIL_CONFIRMATION_SUBJECT = "Confirmación de cuenta"
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+ACCOUNT_PASSWORD_RESET_SUBJECT = "Restablecer contraseña"
+
+ACCOUNT_EMAIL_CONFIRMATION_HTML = True
+ACCOUNT_PASSWORD_RESET_HTML = True
+
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
@@ -164,7 +173,6 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory' #tengo que cambiar por 'mandatory' para que sea obligatorio la confirmación de correo
 ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
 ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
-ACCOUNT_EMAIL_SUBJECT_PREFIX = '[gerart674.pythonanywhere.com] '
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -174,15 +182,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ALLOWED_HOSTS = ["gerart674.pythonanywhere.com"]
 
 DATABASES = {
-       "default": {
-              "ENGINE": "django.db.backends.mysql",
-             "NAME": "gerart674$default",
-              "USER": "gerart674",
-            "PASSWORD": "172503Gt",
-             "HOST": "gerart674.mysql.pythonanywhere-services.com",
-              "PORT": "3306",
-          }
-    }
+        "default": {
+               "ENGINE": "django.db.backends.mysql",
+              "NAME": "gerart674$default",
+               "USER": "gerart674",
+             "PASSWORD": "172503Gt",
+              "HOST": "gerart674.mysql.pythonanywhere-services.com",
+               "PORT": "3306",
+           }
+     }
 
 STATIC_ROOT = "/home/gerart674/aplicacioncitaspladsh/static"
 
@@ -191,10 +199,10 @@ STATIC_ROOT = "/home/gerart674/aplicacioncitaspladsh/static"
 # ALLOWED_HOSTS = []
 
 # DATABASES = {
-#                 "default": {
-#                  "ENGINE": "django.db.backends.sqlite3",
-#                  "NAME": BASE_DIR / "db.sqlite3",
-#              }
-#          }
+#                  "default": {
+#                   "ENGINE": "django.db.backends.sqlite3",
+#                   "NAME": BASE_DIR / "db.sqlite3",
+#               }
+#           }
 
 

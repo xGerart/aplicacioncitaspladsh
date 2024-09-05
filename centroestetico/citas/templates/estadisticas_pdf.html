@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Estadísticas - Centro Estético</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { width: 80%; margin: auto; overflow: hidden; }
+        h1, h2 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .summary { background-color: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Informe de Estadísticas - Centro Estético</h1>
+        <p>Período: {{ fecha_inicio }} - {{ fecha_fin }}</p>
+
+        <div class="summary">
+            <h2>Resumen General</h2>
+            <p>Total de citas: {{ total_citas }}</p>
+            <p>Ingresos totales: {{ ingresos_totales }}</p>
+            <p>Tasa de cancelación: {{ tasa_cancelacion }}%</p>
+            <p>Duración promedio de citas: {{ duracion_promedio }} minutos</p>
+        </div>
+
+        <h2>Servicios</h2>
+        <table>
+            <tr>
+                <th>Servicio</th>
+                <th>Número de Citas</th>
+                <th>Ingresos</th>
+            </tr>
+            {% for servicio in servicios %}
+            <tr>
+                <td>{{ servicio.nombre }}</td>
+                <td>{{ servicio.num_citas }}</td>
+                <td>{{ servicio.ingresos }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Empleados</h2>
+        <table>
+            <tr>
+                <th>Empleado</th>
+                <th>Número de Citas</th>
+                <th>Ingresos Generados</th>
+            </tr>
+            {% for empleado in empleados %}
+            <tr>
+                <td>{{ empleado.nombre }}</td>
+                <td>{{ empleado.num_citas }}</td>
+                <td>{{ empleado.ingresos }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <h2>Horas Pico</h2>
+        <table>
+            <tr>
+                <th>Horas</th>
+                <th>Número de Citas</th>
+            </tr>
+            {% for hora in horas_pico %}
+            <tr>
+                <td>{{ hora.hora }}:00</td>
+                <td>{{ hora.count }} citas</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <div class="no-print">
+            <button onclick="window.print()">Imprimir Informe</button>
+        </div>
+    </div>
+</body>
+</html>
+        

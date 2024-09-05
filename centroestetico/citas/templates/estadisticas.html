@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Panel de Estadísticas</h1>
+
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="fecha_inicio">Fecha Inicio:</label>
+                <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label for="fecha_fin">Fecha Fin:</label>
+                <input type="date" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label for="tipo_grafico">Tipo de Gráfico:</label>
+                <select id="tipo_grafico" class="form-control">
+                    <option value="bar">Barras</option>
+                    <option value="pie">Circular</option>
+                    <option value="line">Líneas</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Actualizar</button>
+    </form>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    Top Clientes 
+                </div>
+                <div class="card-body">
+                    <canvas id="clientesChart"></canvas>
+                    <ul class="list-group mt-3">
+                        {% for cliente in top_clientes %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ cliente.nombre }}
+                            <span class="badge bg-primary rounded-pill">{{ cliente.num_citas }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    Top Servicios 
+                </div>
+                <div class="card-body">
+                    <canvas id="serviciosChart"></canvas>
+                    <ul class="list-group mt-3">
+                        {% for servicio in top_servicios %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ servicio.nombre }}
+                            <span class="badge bg-primary rounded-pill">{{ servicio.num_citas }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    Top Empleados
+                </div>
+                <div class="card-body">
+                    <canvas id="empleadosChart"></canvas>
+                    <ul class="list-group mt-3">
+                        {% for empleado in top_empleados %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ empleado.nombre }}
+                            <span class="badge bg-primary rounded-pill">{{ empleado.num_citas }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'estadisticas_pdf' %}?pdf=1&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}" class="btn btn-primary" target="_blank">Generar Informe</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function generateColors(count) {
+        const colors = [];
+        for (let i = 0; i < count; i++) {
+            const hue = (i * 137.508) % 360;
+            colors.push(`hsl(${hue}, 70%, 60%)`);
+        }
+        return colors;
+    }
+
+    function createChart(id, labels, data, label) {
+        const ctx = document.getElementById(id).getContext('2d');
+        const colors = generateColors(data.length);
+        
+        const chart = new Chart(ctx, {
+            type: document.getElementById('tipo_grafico').value,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: colors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        return chart;
+    }
+
+    let charts = [];
+
+    function updateCharts() {
+        const type = document.getElementById('tipo_grafico').value;
+        charts.forEach(chart => {
+            chart.config.type = type;
+            chart.update();
+        });
+    }
+
+    document.getElementById('tipo_grafico').addEventListener('change', updateCharts);
+
+    charts.push(createChart('clientesChart', 
+        [{% for cliente in top_clientes %}'{{ cliente.nombre }}',{% endfor %}],
+        [{% for cliente in top_clientes %}{{ cliente.num_citas }},{% endfor %}],
+        'Número de Citas'
+    ));
+
+    charts.push(createChart('serviciosChart', 
+        [{% for servicio in top_servicios %}'{{ servicio.nombre }}',{% endfor %}],
+        [{% for servicio in top_servicios %}{{ servicio.num_citas }},{% endfor %}],
+        'Número de Citas'
+    ));
+
+    charts.push(createChart('empleadosChart', 
+        [{% for empleado in top_empleados %}'{{ empleado.nombre }}',{% endfor %}],
+        [{% for empleado in top_empleados %}{{ empleado.num_citas }},{% endfor %}],
+        'Número de Citas'
+    ));
+</script>
+{% endblock %}
