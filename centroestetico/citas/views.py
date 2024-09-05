@@ -32,25 +32,25 @@ def agendar_cita(request):
 
             if cita.hora_inicio:
                 cita.save()
-                subject = "Confirmación de tu cita"
-                html_message = render_to_string(
-                    "emails/email_confirmacion_cita.html",
-                    {
-                        "cita": cita,
-                        "cliente": cita.cliente,
-                        "centro": {
-                            "nombre": "Centro Estético Pladsh",
-                            "direccion": "Calle Napo entre Sergio Saenz y Ernesto Rodríguez, Coca, Ecuador",
-                        },
-                    },
-                )
-                plain_message = strip_tags(html_message)
-                from_email = settings.EMAIL_HOST_USER
-                to = cita.cliente.email
+                # subject = "Confirmación de tu cita"
+                # html_message = render_to_string(
+                #     "emails/email_confirmacion_cita.html",
+                #     {
+                #         "cita": cita,
+                #         "cliente": cita.cliente,
+                #         "centro": {
+                #             "nombre": "Centro Estético Pladsh",
+                #             "direccion": "Calle Napo entre Sergio Saenz y Ernesto Rodríguez, Coca, Ecuador",
+                #         },
+                #     },
+                # )
+                # plain_message = strip_tags(html_message)
+                # from_email = settings.EMAIL_HOST_USER
+                # to = cita.cliente.email
 
-                send_mail(
-                    subject, plain_message, from_email, [to], html_message=html_message
-                )
+                # send_mail(
+                #     subject, plain_message, from_email, [to], html_message=html_message
+                # )
 
                 messages.success(
                     request,
