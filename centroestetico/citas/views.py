@@ -81,8 +81,8 @@ def agendar_cita(request):
         {
             "form": form,
             "servicios": servicios,
-            "horario_cierre": horario_cierre.strftime("%H:%M"),
-        },
+            "horario_cierre": horario_cierre.strftime("%H:%M")
+        }
     )
 
 
