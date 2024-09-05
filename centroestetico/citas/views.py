@@ -126,15 +126,6 @@ def get_empleados_disponibles(request):
     }
     return JsonResponse(data)
 
-
-from django.utils import timezone
-from datetime import datetime, timedelta
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-from .models import Empleado, Servicio, Cita, HorarioEmpleado, HorarioCentro
-
-
 @require_GET
 def get_bloques_disponibles(request):
     empleado_id = request.GET.get("empleado")
