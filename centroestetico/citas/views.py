@@ -6,8 +6,19 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django.core.mail import send_mail
-from django.db.models import Q, Count, Sum, Avg, Case, When, Value, DecimalField
-from django.db.models.functions import TruncMonth, ExtractHour
+from django.db.models import (
+    Q,
+    Count,
+    Sum,
+    Avg,
+    Case,
+    When,
+    Value,
+    DecimalField,
+    F,
+    DateField,
+)
+from django.db.models.functions import TruncMonth, ExtractHour, TruncDate, ExtractWeekDay
 from django.views.decorators.http import require_GET
 from .models import Empleado, Cita, Cliente, Servicio, HorarioEmpleado, HorarioCentro
 from .forms import CitaForm
@@ -15,6 +26,7 @@ from .decorators import cliente_required, recepcionista_required
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
+from django.db import connection
 
 logger = logging.getLogger(__name__)
 
@@ -65,17 +77,22 @@ def agendar_cita(request):
                     messages.error(request, f"{field}: {error}")
     else:
         form = CitaForm()
-    
+
     servicios = Servicio.objects.all()
     # horario_cierre = HorarioCentro.objects.get(dia=timezone.now().weekday()).hora_cierre
-    
+
     # print(f"Fecha actual: {timezone.now().date()}, Hora de cierre: {horario_cierre}")
-    
-    return render(request, 'cita.html', {
-        'form': form, 
-        'servicios': servicios,
-        # 'horario_cierre': horario_cierre.strftime('%H:%M')
-    })
+
+    return render(
+        request,
+        "cita.html",
+        {
+            "form": form,
+            "servicios": servicios,
+            # 'horario_cierre': horario_cierre.strftime('%H:%M')
+        },
+    )
+
 
 @login_required
 def cancelar_cita(request, cita_id):
@@ -120,6 +137,7 @@ def get_empleados_disponibles(request):
         ]
     }
     return JsonResponse(data)
+
 
 @require_GET
 def get_bloques_disponibles(request):
@@ -283,9 +301,7 @@ def get_current_time(request):
 
 
 def format_currency(value):
-    if value is None:
-        return "$0.00"
-    return f"${value:.2f}"
+    return f"${value:.2f}" if value is not None else "$0.00"
 
 
 @login_required
@@ -299,8 +315,10 @@ def estadisticas(request):
     if not fecha_fin:
         fecha_fin = timezone.now().strftime("%Y-%m-%d")
 
-    fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
-    fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
+    fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+    fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
+
+    total_citas = Cita.objects.filter(fecha__range=[fecha_inicio, fecha_fin]).count()
 
     # Filtro base para las citas
     citas_filter = Q(citas__fecha__range=[fecha_inicio, fecha_fin])
@@ -354,108 +372,98 @@ def estadisticas(request):
 @login_required
 @recepcionista_required
 def estadisticas_pdf(request):
-    fecha_inicio = request.GET.get("fecha_inicio")
-    fecha_fin = request.GET.get("fecha_fin")
-
-    # Verificar que las fechas no sean nulas
-    if not fecha_inicio or not fecha_fin:
-        messages.error(request, "Por favor, seleccione un rango de fechas válido.")
-        return redirect("estadisticas")
-
     try:
-        fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
-        fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
-    except ValueError:
-        messages.error(request, "Formato de fecha inválido.")
-        return redirect("estadisticas")
+        fecha_inicio = request.GET.get("fecha_inicio")
+        fecha_fin = request.GET.get("fecha_fin")
 
-    # Estadísticas generales
-    total_citas = Cita.objects.filter(fecha__range=[fecha_inicio, fecha_fin]).count()
-    ingresos_totales = (
-        Cita.objects.filter(
-            fecha__range=[fecha_inicio, fecha_fin], estado=Cita.ESTADO_TERMINADA
-        ).aggregate(total=Sum("servicio__precio"))["total"]
-        or 0
-    )
+        if not fecha_inicio or not fecha_fin:
+            return redirect("estadisticas")
 
-    # Servicios
-    servicios = Servicio.objects.annotate(
-        num_citas=Count("cita", filter=Q(cita__fecha__range=[fecha_inicio, fecha_fin])),
-        ingresos=Sum(
-            Case(
-                When(cita__estado=Cita.ESTADO_TERMINADA, then="precio"),
-                default=Value(0),
-                output_field=DecimalField(),
-            ),
-            filter=Q(cita__fecha__range=[fecha_inicio, fecha_fin]),
-        ),
-    ).order_by("-ingresos")
+        fecha_inicio = timezone.datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+        fecha_fin = timezone.datetime.strptime(fecha_fin, "%Y-%m-%d").date()
 
-    # Empleados
-    empleados = Empleado.objects.annotate(
-        num_citas=Count(
-            "empleados", filter=Q(empleados__fecha__range=[fecha_inicio, fecha_fin])
-        ),
-        ingresos=Sum(
-            Case(
-                When(
-                    empleados__estado=Cita.ESTADO_TERMINADA,
-                    then="empleados__servicio__precio",
+        # Estadísticas generales
+        total_citas = Cita.objects.filter(
+            fecha__range=[fecha_inicio, fecha_fin]
+        ).count()
+
+        # Servicios más populares
+        servicios_populares = Servicio.objects.annotate(
+            num_citas=Count(
+                "cita", filter=Q(cita__fecha__range=[fecha_inicio, fecha_fin])
+            )
+        ).order_by("-num_citas")[:5]
+
+        # Empleados más ocupados
+        empleados_ocupados = Empleado.objects.annotate(
+            num_citas=Count(
+                "empleados", filter=Q(empleados__fecha__range=[fecha_inicio, fecha_fin])
+            )
+        ).order_by("-num_citas")[:5]
+
+        # Tasa de cancelación
+        citas_canceladas = Cita.objects.filter(
+            fecha__range=[fecha_inicio, fecha_fin], estado=Cita.ESTADO_CANCELADA
+        ).count()
+        tasa_cancelacion = (
+            (citas_canceladas / total_citas * 100) if total_citas > 0 else 0
+        )
+
+        # Duración promedio de citas
+        duracion_promedio = (
+            Cita.objects.filter(fecha__range=[fecha_inicio, fecha_fin]).aggregate(
+                avg_duration=Avg("servicio__duracion")
+            )["avg_duration"]
+            or 0
+        )
+        # Horas pico
+        horas_pico = (
+            Cita.objects.filter(fecha__range=[fecha_inicio, fecha_fin])
+            .annotate(hora=ExtractHour("hora_inicio"))
+            .values("hora")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:3]
+        )
+
+        # Ocupación por día
+        ocupacion_por_dia = (
+            Cita.objects.filter(fecha__range=[fecha_inicio, fecha_fin])
+            .values("fecha")
+            .annotate(total_citas=Count("id"), total_duracion=Sum("servicio__duracion"))
+            .order_by("fecha")
+        )
+
+        # Servicios más cancelados
+        servicios_cancelados = Servicio.objects.annotate(
+            cancelaciones=Count(
+                "cita",
+                filter=Q(
+                    cita__fecha__range=[fecha_inicio, fecha_fin],
+                    cita__estado=Cita.ESTADO_CANCELADA,
                 ),
-                default=Value(0),
-                output_field=DecimalField(),
-            ),
-            filter=Q(empleados__fecha__range=[fecha_inicio, fecha_fin]),
-        ),
-    ).order_by("-ingresos")
+            )
+        ).order_by("-cancelaciones")[:5]
 
-    # Tasa de cancelación
-    citas_canceladas = Cita.objects.filter(
-        fecha__range=[fecha_inicio, fecha_fin], estado=Cita.ESTADO_CANCELADA
-    ).count()
-    tasa_cancelacion = (citas_canceladas / total_citas) * 100 if total_citas > 0 else 0
+        context = {
+            "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d"),
+            "fecha_fin": fecha_fin.strftime("%Y-%m-%d"),
+            "total_citas": total_citas,
+            "servicios_populares": servicios_populares,
+            "empleados_ocupados": empleados_ocupados,
+            "tasa_cancelacion": round(tasa_cancelacion, 2),
+            "duracion_promedio": round(duracion_promedio),
+            "horas_pico": horas_pico,
+            "ocupacion_por_dia": ocupacion_por_dia,
+            "servicios_cancelados": servicios_cancelados,
+        }
 
-    # Duración promedio de citas
-    duracion_promedio = (
-        Cita.objects.filter(fecha__range=[fecha_inicio, fecha_fin]).aggregate(
-            avg_duration=Avg("servicio__duracion")
-        )["avg_duration"]
-        or 0
-    )
+        return render(request, "estadisticas_pdf.html", context)
 
-    # Horas pico
-    horas_pico = (
-        Cita.objects.filter(fecha__range=[fecha_inicio, fecha_fin])
-        .annotate(hora=ExtractHour("hora_inicio"))
-        .values("hora")
-        .annotate(count=Count("id"))
-        .order_by("-count")[:3]
-    )
-
-    context = {
-        "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d"),
-        "fecha_fin": fecha_fin.strftime("%Y-%m-%d"),
-        "total_citas": total_citas,
-        "ingresos_totales": format_currency(ingresos_totales),
-        "servicios": [
-            {
-                "nombre": servicio.nombre,
-                "num_citas": servicio.num_citas,
-                "ingresos": format_currency(servicio.ingresos),
-            }
-            for servicio in servicios
-        ],
-        "empleados": [
-            {
-                "nombre": empleado.nombre,
-                "num_citas": empleado.num_citas,
-                "ingresos": format_currency(empleado.ingresos),
-            }
-            for empleado in empleados
-        ],
-        "tasa_cancelacion": round(tasa_cancelacion, 2),
-        "duracion_promedio": round(duracion_promedio),
-        "horas_pico": horas_pico,
-    }
-
-    return render(request, "estadisticas_pdf.html", context)
+    except Exception as e:
+        logger.error(f"Error en estadisticas_pdf: {str(e)}")
+        logger.error(f"Query que causó el error: {connection.queries[-1]['sql']}")
+        messages.error(
+            request,
+            "Ocurrió un error al generar las estadísticas. Por favor, inténtelo de nuevo.",
+        )
+        return redirect("estadisticas")

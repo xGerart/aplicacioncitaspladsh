@@ -15,65 +15,145 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Informe de Estadísticas - Centro Estético</h1>
-        <p>Período: {{ fecha_inicio }} - {{ fecha_fin }}</p>
-
-        <div class="summary">
-            <h2>Resumen General</h2>
-            <p>Total de citas: {{ total_citas }}</p>
-            <p>Ingresos totales: {{ ingresos_totales }}</p>
-            <p>Tasa de cancelación: {{ tasa_cancelacion }}%</p>
-            <p>Duración promedio de citas: {{ duracion_promedio }} minutos</p>
+    <div class="container fade-in">
+        <h1 class="display-4 text-center mb-4">Informe de Estadísticas - Centro Estético</h1>
+        <p class="lead text-center">Período: {{ fecha_inicio }} - {{ fecha_fin }}</p>
+    
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Resumen General</h2>
+            </div>
+            <div class="card-body">
+                <p><strong>Total de citas:</strong> {{ total_citas }}</p>
+                <p><strong>Tasa de cancelación:</strong> {{ tasa_cancelacion }}%</p>
+                <p><strong>Duración promedio de citas:</strong> {{ duracion_promedio }} minutos</p>
+            </div>
         </div>
-
-        <h2>Servicios</h2>
-        <table>
-            <tr>
-                <th>Servicio</th>
-                <th>Número de Citas</th>
-                <th>Ingresos</th>
-            </tr>
-            {% for servicio in servicios %}
-            <tr>
-                <td>{{ servicio.nombre }}</td>
-                <td>{{ servicio.num_citas }}</td>
-                <td>{{ servicio.ingresos }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-
-        <h2>Empleados</h2>
-        <table>
-            <tr>
-                <th>Empleado</th>
-                <th>Número de Citas</th>
-                <th>Ingresos Generados</th>
-            </tr>
-            {% for empleado in empleados %}
-            <tr>
-                <td>{{ empleado.nombre }}</td>
-                <td>{{ empleado.num_citas }}</td>
-                <td>{{ empleado.ingresos }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        <h2>Horas Pico</h2>
-        <table>
-            <tr>
-                <th>Horas</th>
-                <th>Número de Citas</th>
-            </tr>
-            {% for hora in horas_pico %}
-            <tr>
-                <td>{{ hora.hora }}:00</td>
-                <td>{{ hora.count }} citas</td>
-            </tr>
-            {% endfor %}
-        </table>
-
-        <div class="no-print">
-            <button onclick="window.print()">Imprimir Informe</button>
+    
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Servicios Más Populares</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Número de Citas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for servicio in servicios_populares %}
+                        <tr>
+                            <td>{{ servicio.nombre }}</td>
+                            <td>{{ servicio.num_citas }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Empleados Más Ocupados</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Número de Citas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empleado in empleados_ocupados %}
+                        <tr>
+                            <td>{{ empleado.nombre }}</td>
+                            <td>{{ empleado.num_citas }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+       
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Horas Pico</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Número de Citas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hora in horas_pico %}
+                        <tr>
+                            <td>{{ hora.hora }}:00</td>
+                            <td>{{ hora.count }} citas</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Ocupación por Día</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Total de Citas</th>
+                            <th>Duración Total (minutos)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dia in ocupacion_por_dia %}
+                        <tr>
+                            <td>{{ dia.fecha }}</td>
+                            <td>{{ dia.total_citas }}</td>
+                            <td>{{ dia.total_duracion }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Servicios Más Cancelados</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Cancelaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for servicio in servicios_cancelados %}
+                        <tr>
+                            <td>{{ servicio.nombre }}</td>
+                            <td>{{ servicio.cancelaciones }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <div class="text-center mb-4">
+            <button class="btn btn-primary" onclick="window.print()">Imprimir Informe</button>
         </div>
     </div>
 </body>
