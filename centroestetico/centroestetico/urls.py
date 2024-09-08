@@ -5,7 +5,10 @@ from . import views as main_views
 from django.conf import settings
 from django.conf.urls.static import static
 
+BASE_URL = "https://gerart674.pythonanywhere.com/"
+
 urlpatterns = [
+    
     path('', main_views.home, name='home'),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
