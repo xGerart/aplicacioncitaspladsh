@@ -38,7 +38,7 @@ class AgendarCitaIntegrationTest(TestCase):
             'fecha': '2023-01-01',
             'hora_inicio': '10:00'
         })
-        self.assertEqual(response.status_code, 302)  # Redirección después de éxito
+        self.assertEqual(response.status_code, 302) 
 
         # Verificar que la cita se creó
         self.assertTrue(Cita.objects.filter(cliente=self.cliente, servicio=self.servicio).exists())

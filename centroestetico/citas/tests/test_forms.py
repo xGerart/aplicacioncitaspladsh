@@ -19,7 +19,7 @@ class CitaFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_cita_form_invalid(self):
-        form_data = {'servicio': self.servicio.id}  # Datos incompletos
+        form_data = {'servicio': self.servicio.id}
         form = CitaForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('empleado', form.errors)
@@ -40,9 +40,9 @@ class ClienteFormTest(TestCase):
 
     def test_cliente_form_invalid(self):
         form_data = {
-            'cedula': '123',  # Cédula muy corta
-            'nombre': '',  # Nombre vacío
-            'email': 'notanemail',  # Email inválido
+            'cedula': '123',  
+            'nombre': '',  
+            'email': 'notanemail', 
         }
         form = ClienteForm(data=form_data)
         self.assertFalse(form.is_valid())

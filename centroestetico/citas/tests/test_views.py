@@ -43,8 +43,6 @@ class AjaxViewsTest(TestCase):
         })
 
     def test_get_bloques_disponibles(self):
-        # Esta prueba dependerá de cómo hayas implementado la lógica de bloques disponibles
-        # Aquí hay un ejemplo básico
         response = self.client.get(reverse('get_bloques_disponibles'), {
             'empleado': self.empleado.id,
             'servicio': self.servicio.id,

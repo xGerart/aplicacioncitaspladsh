@@ -14,14 +14,14 @@ class SecurityTest(TestCase):
     def test_cliente_cannot_access_recepcionista_view(self):
         self.client.login(username='cliente', password='12345')
         response = self.client.get(reverse('gestion_citas'))
-        self.assertEqual(response.status_code, 403)  # Forbidden
+        self.assertEqual(response.status_code, 403)  
 
     def test_recepcionista_cannot_access_cliente_view(self):
         self.client.login(username='recepcionista', password='12345')
         response = self.client.get(reverse('agendar_cita'))
-        self.assertEqual(response.status_code, 403)  # Forbidden
+        self.assertEqual(response.status_code, 403) 
 
     def test_unauthenticated_user_redirect(self):
         response = self.client.get(reverse('agendar_cita'))
-        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertEqual(response.status_code, 302)  
         self.assertTrue(response.url.startswith('/accounts/login/'))
