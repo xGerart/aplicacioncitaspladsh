@@ -138,62 +138,73 @@ def get_empleados_disponibles(request):
     }
     return JsonResponse(data)
 
+def get_current_time(request):
+    current_time = timezone.localtime(timezone.now()).strftime("%Y-%m-%d %H:%M:%S")
+    return JsonResponse({"current_time": current_time})
 
 @require_GET
 def get_bloques_disponibles(request):
-    empleado_id = request.GET.get("empleado")
-    servicio_id = request.GET.get("servicio")
-    fecha_str = request.GET.get("fecha")
+    try:
+        empleado_id = request.GET.get("empleado")
+        servicio_id = request.GET.get("servicio")
+        fecha_str = request.GET.get("fecha")
+        hora_actual_str = request.GET.get("hora_actual")
 
-    fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
-    dia_semana = fecha.weekday()
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+        hora_actual = timezone.make_aware(datetime.strptime(hora_actual_str, "%Y-%m-%d %H:%M:%S"))
+        dia_semana = fecha.weekday()
 
-    servicio = get_object_or_404(Servicio, id=servicio_id)
-    empleados = (
-        [get_object_or_404(Empleado, id=empleado_id)]
-        if empleado_id != "0"
-        else Empleado.objects.filter(servicios__id=servicio_id)
-    )
+        servicio = get_object_or_404(Servicio, id=servicio_id)
+        duracion_servicio = timedelta(minutes=servicio.duracion)
+        
+        if empleado_id == "0":
+            empleados = Empleado.objects.filter(servicios__id=servicio_id)
+        else:
+            empleados = [get_object_or_404(Empleado, id=empleado_id)]
 
-    bloques_disponibles = []
-    for empleado in empleados:
-        horario = empleado.horarios.filter(
-            dia_semana=dia_semana, disponible=True
-        ).first()
-        if horario:
-            hora_actual = horario.hora_inicio
-            while hora_actual < horario.hora_fin:
-                hora_fin_bloque = (
-                    datetime.combine(fecha, hora_actual) + timedelta(minutes=15)
-                ).time()
-                if hora_fin_bloque <= horario.hora_fin:
-                    # Verificar si el bloque está disponible
-                    if not Cita.objects.filter(
-                        empleado=empleado,
-                        fecha=fecha,
-                        hora_inicio__lt=hora_fin_bloque,
-                        hora_inicio__gte=hora_actual,
-                        estado__in=[Cita.ESTADO_CONFIRMADA, Cita.ESTADO_EN_PROCESO],
-                    ).exists():
-                        bloques_disponibles.append(
-                            {
-                                "inicio": hora_actual.strftime("%H:%M"),
-                                "empleado_id": empleado.id,
-                                "empleado_nombre": empleado.nombre,
-                            }
-                        )
-                hora_actual = hora_fin_bloque
+        bloques_disponibles = []
+        for empleado in empleados:
+            horarios = empleado.horarios.filter(dia_semana=dia_semana, disponible=True)
+            
+            citas_existentes = Cita.objects.filter(
+                empleado=empleado,
+                fecha=fecha,
+                estado__in=[Cita.ESTADO_CONFIRMADA, Cita.ESTADO_EN_PROCESO]
+            ).order_by('hora_inicio')
 
-    return JsonResponse(
-        {
+            for horario in horarios:
+                hora_inicio = max(horario.hora_inicio, hora_actual.time()) if fecha == hora_actual.date() else horario.hora_inicio
+                hora_actual_bloque = timezone.make_aware(datetime.combine(fecha, hora_inicio))
+                hora_fin_horario = timezone.make_aware(datetime.combine(fecha, horario.hora_fin))
+
+                while hora_actual_bloque + duracion_servicio <= hora_fin_horario:
+                    hora_fin_bloque = hora_actual_bloque + timedelta(minutes=15)
+                    
+                    bloque_ocupado = any(
+                        timezone.make_aware(datetime.combine(fecha, cita.hora_inicio)) < hora_fin_bloque and
+                        hora_actual_bloque < timezone.make_aware(datetime.combine(fecha, cita.hora_inicio)) + timedelta(minutes=cita.servicio.duracion)
+                        for cita in citas_existentes
+                    )
+
+                    if not bloque_ocupado:
+                        bloques_disponibles.append({
+                            "inicio": hora_actual_bloque.time().strftime("%H:%M"),
+                            "empleado_id": empleado.id,
+                            "empleado_nombre": empleado.nombre,
+                        })
+
+                    hora_actual_bloque += timedelta(minutes=15)
+
+        bloques_disponibles.sort(key=lambda x: x['inicio'])
+
+        return JsonResponse({
             "bloques": bloques_disponibles,
-            "mensaje": (
-                ""
-                if bloques_disponibles
-                else "No hay horarios disponibles para este día."
-            ),
-        }
-    )
+            "mensaje": "" if bloques_disponibles else "No hay horarios disponibles para este día.",
+        })
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({"error": f"Error interno del servidor: {str(e)}"}, status=500)
 
 
 @login_required
@@ -295,9 +306,7 @@ def resumen_recepcionista(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-def get_current_time(request):
-    current_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
-    return JsonResponse({"current_time": current_time})
+
 
 
 def format_currency(value):

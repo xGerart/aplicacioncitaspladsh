@@ -81,9 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 button.type = 'button';
                                 button.className = 'btn btn-outline-primary bloque-horario';
                                 button.textContent = bloque.inicio;
-                                if (empleadoId === '0') {
-                                    button.title = bloque.empleado_nombre;
-                                }
+                                button.title = `Empleado: ${bloque.empleado_nombre}`;
                                 button.onclick = function() {
                                     horaInicioInput.value = bloque.inicio;
                                     document.getElementById('id_empleado').value = bloque.empleado_id;
