@@ -102,4 +102,19 @@
 
 {% block extra_js %}
 <script src="{% static 'js/agendar_cita.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var descriptionModal = new bootstrap.Modal(document.getElementById('descriptionModal'));
+        
+        document.querySelectorAll('.description-preview').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var description = this.getAttribute('data-description');
+                var name = this.getAttribute('data-name');
+                document.getElementById('modalServiceName').textContent = name;
+                document.getElementById('modalServiceDescription').textContent = description;
+                descriptionModal.show();
+            });
+        });
+    });
+    </script>
 {% endblock %}
