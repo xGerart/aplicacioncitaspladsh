@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root {
+  --primary-color: #4a90e2;
+  --secondary-color: #f8f9fa;
+  --text-color: #333;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+#header {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+#branding h1 {
+  font-weight: 600;
+}
+
+.module h2, .module caption, .inline-group h2 {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 4px;
+  padding: 10px 15px;
+  text-transform: uppercase;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+  background-color: #3570b3;
+}
+
+.object-tools a {
+  background-color: var(--success-color);
+}
+
+.object-tools a:hover {
+  background-color: #218838;
+}
+
+#changelist-filter h2 {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+#changelist .actions {
+  background: white;
+  border-top: 1px solid #ddd;
+  padding: 15px;
+}
+
+.select2-container--admin-autocomplete .select2-results__option--highlighted[aria-selected] {
+  background-color: var(--primary-color);
+}
+
+.paginator a:link, .paginator a:visited {
+  background: var(--primary-color);
+  color: white;
+}
+
+.dashboard #content {
+  width: 100%;
+}
+
+.app-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.app-item {
+  flex: 1 1 300px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.1);
+  padding: 20px;
+  transition: transform 0.3s ease;
+}
+
+.app-item:hover {
+  transform: translateY(-5px);
+}
+
+.app-item h3 {
+  color: var(--primary-color);
+  margin-top: 0;
+}
+
+.app-item table {
+  width: 100%;
+}
+
+.app-item th {
+  text-align: left;
+}
+
+.app-item td {
+  padding: 5px 0;
+}

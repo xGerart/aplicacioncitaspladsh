@@ -413,14 +413,14 @@ def estadisticas_pdf(request):
             num_citas=Count(
                 "cita", filter=Q(cita__fecha__range=[fecha_inicio, fecha_fin])
             )
-        ).order_by("-num_citas")[:5]
+        ).order_by("-num_citas")[:20]
 
         # Empleados más ocupados
         empleados_ocupados = Empleado.objects.annotate(
             num_citas=Count(
                 "empleados", filter=Q(empleados__fecha__range=[fecha_inicio, fecha_fin])
             )
-        ).order_by("-num_citas")[:5]
+        ).order_by("-num_citas")[:20]
 
         # Tasa de cancelación
         citas_canceladas = Cita.objects.filter(
