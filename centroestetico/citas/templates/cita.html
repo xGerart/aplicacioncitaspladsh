@@ -22,7 +22,7 @@
                             <h5 class="card-title">{{ servicio.nombre }}</h5>
                             <p class="card-text description-preview" data-bs-toggle="tooltip" data-bs-placement="bottom"
                                 title="{{ servicio.descripcion }}">
-                                {{ servicio.descripcion|truncatechars:50 }}
+                                {{ servicio.descripcion|truncatechars:80 }}
                             </p>
                             <div class="mt-auto">
                                 <p>Precio: ${{ servicio.precio }}</p>
