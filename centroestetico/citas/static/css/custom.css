@@ -288,10 +288,7 @@ body {
     font-size: 0.9rem;
 }
 
-#descriptionModal .modal-body {
-    max-height: 300px;
-    overflow-y: auto;
-}   
+
 .carousel-item img {
     object-fit: cover;
     height: 400px;
