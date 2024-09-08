@@ -222,11 +222,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     fechaInput.addEventListener('change', cargarBloquesHorarios);
-    document.querySelectorAll('.description-preview').forEach(function (element) {
-        element.addEventListener('click', function () {
-            var description = this.getAttribute('title');
+    document.querySelectorAll('.description-preview').forEach(function(element) {
+        element.addEventListener('click', function() {
+            var description = this.getAttribute('data-description');
             var serviceName = this.closest('.card-body').querySelector('.card-title').textContent;
-
+    
             var modal = new bootstrap.Modal(document.getElementById('descriptionModal'));
             document.getElementById('modalServiceName').textContent = serviceName;
             document.getElementById('modalServiceDescription').textContent = description;

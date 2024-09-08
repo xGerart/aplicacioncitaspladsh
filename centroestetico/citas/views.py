@@ -81,6 +81,7 @@ def agendar_cita(request):
     servicios = Servicio.objects.all()
     for servicio in servicios:
         servicio.duracion_formateada = formatear_duracion(servicio.duracion)
+        servicio.descripcion_completa = servicio.descripcion
 
     return render(
         request,
