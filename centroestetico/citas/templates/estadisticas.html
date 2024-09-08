@@ -33,7 +33,7 @@
                 <div class="card-header">
                     Top Clientes 
                 </div>
-                <div class="card-body">
+                <div class="card-body chart-container">
                     <canvas id="clientesChart"></canvas>
                     <ul class="list-group mt-3">
                         {% for cliente in top_clientes %}
@@ -51,7 +51,7 @@
                 <div class="card-header">
                     Top Servicios 
                 </div>
-                <div class="card-body">
+                <div class="card-body chart-container">
                     <canvas id="serviciosChart"></canvas>
                     <ul class="list-group mt-3">
                         {% for servicio in top_servicios %}
@@ -69,7 +69,7 @@
                 <div class="card-header">
                     Top Empleados
                 </div>
-                <div class="card-body">
+                <div class="card-body chart-container">
                     <canvas id="empleadosChart"></canvas>
                     <ul class="list-group mt-3">
                         {% for empleado in top_empleados %}
@@ -94,7 +94,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     function generateColors(count) {
         const colors = [];
@@ -123,6 +122,8 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
+                aspectRatio: 1,
                 scales: {
                     y: {
                         beginAtZero: true

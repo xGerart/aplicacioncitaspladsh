@@ -315,3 +315,7 @@ body {
 .fab, .fas {
     margin-right: 10px;
 }
+.chart-container {
+    min-height: 400px;
+    width: 100%;
+  }
