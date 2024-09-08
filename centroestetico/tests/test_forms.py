@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
-from ..forms import CitaForm, ClienteForm
-from ..models import Servicio, Empleado
+from citas.forms import CitaForm, ClienteForm
+from citas.models import Servicio, Empleado
 
 class CitaFormTest(TestCase):
     def setUp(self):

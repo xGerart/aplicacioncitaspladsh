@@ -79,6 +79,17 @@ def agendar_cita(request):
         form = CitaForm()
 
     servicios = Servicio.objects.all()
+    for servicio in servicios:
+        servicio.duracion_formateada = formatear_duracion(servicio.duracion)
+
+    return render(
+        request,
+        "cita.html",
+        {
+            "form": form,
+            "servicios": servicios,
+        },
+    )
     # horario_cierre = HorarioCentro.objects.get(dia=timezone.now().weekday()).hora_cierre
 
     # print(f"Fecha actual: {timezone.now().date()}, Hora de cierre: {horario_cierre}")
@@ -215,6 +226,7 @@ def home(request):
             citas = Cita.objects.filter(cliente=cliente).order_by(
                 "fecha", "hora_inicio"
             )
+            
             return render(request, "home.html", {"citas": citas})
         elif cliente.is_recepcionista():
             return render(request, "home.html")
@@ -476,3 +488,15 @@ def estadisticas_pdf(request):
             "Ocurrió un error al generar las estadísticas. Por favor, inténtelo de nuevo.",
         )
         return redirect("estadisticas")
+
+def formatear_duracion(minutos):
+    if minutos < 60:
+        return f"{minutos} min"
+    horas = minutos // 60
+    minutos_restantes = minutos % 60
+    if minutos_restantes == 0:
+        return f"{horas} hora{'s' if horas > 1 else ''}"
+    return f"{horas} hora{'s' if horas > 1 else ''} y {minutos_restantes} min"
+
+def informacion(request):
+    return render(request, 'informacion.html')

@@ -24,6 +24,7 @@ urlpatterns = [
         path('resumen_recepcionista/', citas_views.resumen_recepcionista, name='resumen_recepcionista'),
         path('estadisticas/', citas_views.estadisticas, name='estadisticas'),
         path('estadisticas_pdf/', citas_views.estadisticas_pdf, name='estadisticas_pdf'),
+        path('informacion/', citas_views.informacion, name='informacion'),
     ])),
     path('get_current_time/', citas_views.get_current_time, name='get_current_time'),
 ]

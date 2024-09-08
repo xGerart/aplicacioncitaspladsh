@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from ..models import Cliente, Servicio, Empleado, Cita
+from citas.models import Cliente, Servicio, Empleado, Cita
 
 class AgendarCitaIntegrationTest(TestCase):
     def setUp(self):

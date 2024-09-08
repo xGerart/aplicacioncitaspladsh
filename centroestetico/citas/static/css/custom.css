@@ -19,7 +19,7 @@ body {
 }
 
 .navbar-brand img {
-    height: 40px;
+    height: 70px;
     transition: transform 0.3s ease;
 }
 
@@ -274,4 +274,47 @@ body {
     background-color: #138496;
     border-color: #117a8b;
     color: white;
+}
+.description-preview {
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.description-preview:hover {
+    color: var(--primary-color);
+}
+
+.tooltip {
+    font-size: 0.9rem;
+}
+
+#descriptionModal .modal-body {
+    max-height: 300px;
+    overflow-y: auto;
+}   
+.carousel-item img {
+    object-fit: cover;
+    height: 400px;
+}
+
+.carousel-caption {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.card {
+    transition: transform 0.3s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.fab, .fas {
+    margin-right: 10px;
 }

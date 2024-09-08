@@ -1,4 +1,8 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
     const pasos = [
         document.getElementById('paso1'),
         document.getElementById('paso2'),
@@ -57,12 +61,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const empleadoId = empleadoSelect.value;
         const servicioId = servicioIdInput.value;
         const fecha = fechaInput.value;
-        
+
         fetch('/get_current_time/')
             .then(response => response.json())
             .then(data => {
                 const horaActual = data.current_time;
-                
+
                 fetch(`/citas/get_bloques_disponibles/?empleado=${empleadoId}&servicio=${servicioId}&fecha=${fecha}&hora_actual=${horaActual}`)
                     .then(response => {
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -82,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 button.className = 'btn btn-outline-primary bloque-horario';
                                 button.textContent = bloque.inicio;
                                 button.title = `Empleado: ${bloque.empleado_nombre}`;
-                                button.onclick = function() {
+                                button.onclick = function () {
                                     horaInicioInput.value = bloque.inicio;
                                     document.getElementById('id_empleado').value = bloque.empleado_id;
                                     bloquesGrid.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
@@ -112,24 +116,26 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('No se pudo encontrar el elemento del servicio');
             return;
         }
-    
+
         const cardElement = servicioElement.closest('.card');
         if (!cardElement) {
             console.error('No se pudo encontrar el elemento card del servicio');
             return;
         }
-    
+
         const servicio = cardElement.querySelector('.card-title')?.textContent || 'No especificado';
         const empleado = empleadoSelect.options[empleadoSelect.selectedIndex]?.text || 'No especificado';
         const fecha = fechaInput.value || 'No especificada';
         const hora = horaInicioInput.value || 'No especificada';
-    
+
         const duracionElement = cardElement.querySelector('.mt-auto p:nth-child(2)');
-        const duracion = duracionElement ? duracionElement.textContent.match(/\d+/)[0] : 'No especificada';
-    
+        const duracion = duracionElement ? duracionElement.textContent.replace('Duración: ', '') : 'No especificada';
+
         const precioElement = cardElement.querySelector('.mt-auto p:nth-child(1)');
         const precio = precioElement ? precioElement.textContent.match(/\$(\d+)/)[1] : 'No especificado';
-    
+
+
+
         resumenCita.innerHTML = `
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
@@ -159,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="row">
                         <div class="col-12 mb-3">
                             <i class="fas fa-hourglass-half text-primary"></i>
-                            <strong>Duración:</strong> ${duracion} minutos
+                            <strong>Duración:</strong> ${duracion}
                         </div>
                     </div>
                     <hr>
@@ -177,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     servicioButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const servicioId = this.getAttribute('data-servicio-id');
             if (servicioIdInput) {
                 servicioIdInput.value = servicioId;
@@ -191,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     botones.continuar.forEach((boton, index) => {
         if (boton) {
-            boton.addEventListener('click', function() {
+            boton.addEventListener('click', function () {
                 const pasoActual = index + 1;
                 if (pasoActual === 2 && !empleadoSelect.value) {
                     mostrarAlerta('Por favor, selecciona un empleado.', 'warning');
@@ -216,4 +222,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     fechaInput.addEventListener('change', cargarBloquesHorarios);
+    document.querySelectorAll('.description-preview').forEach(function (element) {
+        element.addEventListener('click', function () {
+            var description = this.getAttribute('title');
+            var serviceName = this.closest('.card-body').querySelector('.card-title').textContent;
+
+            var modal = new bootstrap.Modal(document.getElementById('descriptionModal'));
+            document.getElementById('modalServiceName').textContent = serviceName;
+            document.getElementById('modalServiceDescription').textContent = description;
+            modal.show();
+        });
+    });
 });

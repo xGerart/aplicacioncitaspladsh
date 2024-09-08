@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block content %}
+
 <div class="container mt-5">
     <div class="text-center mb-5">
-        <h1 class="display-4 mb-4 text-primary">Bienvenido a nuestro sistema de citas</h1>
+        
+        <h1 class="display-4 mb-4 text-primary">Bienvenido a Pladsh Centro Estético</h1>
+        <img src="{% static 'images/logo.png' %}" alt="Pladsh Logo" class="img-fluid mb-3" style="max-width: 300px;">
         <p class="lead">Agenda tus citas de belleza y bienestar de manera fácil y rápida.</p>
     </div>
-
+    
     {% if user.is_authenticated %}
         {% if user.cliente.rol == "CL" %}
             <div class="row justify-content-center mb-5">

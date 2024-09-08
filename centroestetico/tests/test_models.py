@@ -1,13 +1,14 @@
 from django.test import TestCase
 from django.utils import timezone
 from datetime import timedelta
-from ..models import Cliente, Empleado, Servicio, Cita
+from citas.models import Cliente, Empleado, Servicio, Cita
 
 class ClienteModelTest(TestCase):
     def setUp(self):
         self.cliente = Cliente.objects.create(
             cedula="1234567890",
             nombre="Juan Pérez",
+            fechanacimiento="1990-01-01",
             email="juan@example.com",
             rol=Cliente.CLIENTE
         )

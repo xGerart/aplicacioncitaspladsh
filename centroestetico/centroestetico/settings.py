@@ -182,15 +182,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ALLOWED_HOSTS = ["gerart674.pythonanywhere.com"]
 
 DATABASES = {
-            "default": {
-                   "ENGINE": "django.db.backends.mysql",
-                  "NAME": "gerart674$default",
-                   "USER": "gerart674",
-                 "PASSWORD": "172503Gt",
-                  "HOST": "gerart674.mysql.pythonanywhere-services.com",
-                   "PORT": "3306",
-               }
-         }
+             "default": {
+                    "ENGINE": "django.db.backends.mysql",
+                   "NAME": "gerart674$default",
+                    "USER": "gerart674",
+                  "PASSWORD": "172503Gt",
+                   "HOST": "gerart674.mysql.pythonanywhere-services.com",
+                    "PORT": "3306",
+                }
+          }
 
 STATIC_ROOT = "/home/gerart674/aplicacioncitaspladsh/static"
 
@@ -199,10 +199,10 @@ STATIC_ROOT = "/home/gerart674/aplicacioncitaspladsh/static"
 # ALLOWED_HOSTS = []
 
 # DATABASES = {
-#                      "default": {
+#                       "default": {
 #                       "ENGINE": "django.db.backends.sqlite3",
-#                       "NAME": BASE_DIR / "db.sqlite3",
-#                   }
-#               }
+#                        "NAME": BASE_DIR / "db.sqlite3",
+#                    }
+#                }
 
 

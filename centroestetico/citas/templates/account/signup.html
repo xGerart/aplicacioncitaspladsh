@@ -30,4 +30,12 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var fechaNacimiento = document.getElementById('id_fechanacimiento');
+        if (fechaNacimiento) {
+            fechaNacimiento.valueAsDate = new Date('2000-01-01');
+        }
+    });
+</script>
 {% endblock %}
