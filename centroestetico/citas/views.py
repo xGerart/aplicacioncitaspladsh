@@ -312,7 +312,6 @@ def resumen_recepcionista(request):
                 "servicio": proxima_cita.servicio.nombre,
                 "hora": proxima_cita.hora_inicio.strftime("%H:%M"),
             }
-        print("Data enviada:", data)
         return JsonResponse(data)
     except Exception as e:
         print(f"Error en resumen_recepcionista: {str(e)}")

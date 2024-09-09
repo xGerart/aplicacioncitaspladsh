@@ -133,9 +133,6 @@ class HorarioEmpleado(models.Model):
     def clean(self):
         super().clean()
         
-        if self.hora_inicio is None or self.hora_fin is None:
-            raise ValidationError(_("Error al guardar horario"))
-
         # Get the center's schedule for the same day
         try:
             horario_centro = HorarioCentro.objects.get(dia=self.dia_semana)
