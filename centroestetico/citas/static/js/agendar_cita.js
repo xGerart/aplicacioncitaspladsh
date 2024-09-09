@@ -78,23 +78,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (data.mensaje) {
                             mostrarAlerta(data.mensaje, 'info');
                         } else if (data.bloques && data.bloques.length > 0) {
-                            const bloquesGrid = document.createElement('div');
-                            bloquesGrid.className = 'bloques-horarios-grid';
-                            data.bloques.forEach(bloque => {
-                                const button = document.createElement('button');
-                                button.type = 'button';
-                                button.className = 'btn btn-outline-primary bloque-horario';
-                                button.textContent = bloque.inicio;
-                                button.title = `Empleado: ${bloque.empleado_nombre}`;
-                                button.onclick = function () {
-                                    horaInicioInput.value = bloque.inicio;
-                                    document.getElementById('id_empleado').value = bloque.empleado_id;
-                                    bloquesGrid.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                                    button.classList.add('active');
-                                };
-                                bloquesGrid.appendChild(button);
-                            });
-                            bloquesContainer.appendChild(bloquesGrid);
+                            if (empleadoId === "0") { // Cualquier profesional
+                                const bloquesAgrupados = agruparBloquesPorEmpleado(data.bloques);
+                                Object.entries(bloquesAgrupados).forEach(([empleadoNombre, bloques]) => {
+                                    const empleadoDiv = document.createElement('div');
+                                    empleadoDiv.className = 'mb-3';
+                                    empleadoDiv.innerHTML = `<h5>${empleadoNombre}</h5>`;
+                                    const bloquesGrid = crearBloquesGrid(bloques);
+                                    empleadoDiv.appendChild(bloquesGrid);
+                                    bloquesContainer.appendChild(empleadoDiv);
+                                });
+                            } else {
+                                const bloquesGrid = crearBloquesGrid(data.bloques);
+                                bloquesContainer.appendChild(bloquesGrid);
+                            }
                         } else {
                             mostrarAlerta('No hay horarios disponibles para este día.', 'info');
                         }
@@ -108,6 +105,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error al obtener la hora actual:', error);
                 mostrarAlerta('Error al cargar los horarios. Por favor, intenta de nuevo.', 'danger');
             });
+    }
+
+    function agruparBloquesPorEmpleado(bloques) {
+        return bloques.reduce((acc, bloque) => {
+            if (!acc[bloque.empleado_nombre]) {
+                acc[bloque.empleado_nombre] = [];
+            }
+            acc[bloque.empleado_nombre].push(bloque);
+            return acc;
+        }, {});
+    }
+
+    function crearBloquesGrid(bloques) {
+        const bloquesGrid = document.createElement('div');
+        bloquesGrid.className = 'bloques-horarios-grid';
+        bloques.forEach(bloque => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-outline-primary bloque-horario';
+            button.textContent = bloque.inicio;
+            button.onclick = function () {
+                horaInicioInput.value = bloque.inicio;
+                document.getElementById('id_empleado').value = bloque.empleado_id;
+                bloquesGrid.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            };
+            bloquesGrid.appendChild(button);
+        });
+        return bloquesGrid;
     }
 
     function actualizarResumen() {
