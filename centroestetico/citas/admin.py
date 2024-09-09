@@ -79,13 +79,7 @@ class HorarioEmpleadoForm(forms.ModelForm):
         model = HorarioEmpleado
         fields = '__all__'
 
-    def clean(self):
-        cleaned_data = super().clean()
-        try:
-            self.instance.clean()
-        except ValidationError as e:
-            self.add_error(None, e)
-        return cleaned_data
+
 
 @admin.register(HorarioEmpleado)
 class HorarioEmpleadoAdmin(admin.ModelAdmin):

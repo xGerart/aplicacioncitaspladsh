@@ -123,23 +123,20 @@ class HorarioEmpleado(models.Model):
     ]
     empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name="horarios")
     dia_semana = models.IntegerField(choices=OPCIONES_DIAS)
-    hora_inicio = models.TimeField()
-    hora_fin = models.TimeField()
+    hora_inicio = models.TimeField(null=False, blank=False)
+    hora_fin = models.TimeField(null=False, blank=False)
     disponible = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ['empleado', 'dia_semana', 'hora_inicio', 'hora_fin']
 
     def clean(self):
-        super().clean()
-        
-        # Get the center's schedule for the same day
+      
         try:
             horario_centro = HorarioCentro.objects.get(dia=self.dia_semana)
         except HorarioCentro.DoesNotExist:
             raise ValidationError(_("No hay un horario definido para el centro en este día."))
 
-        # Check if the employee's schedule is within the center's hours
         if self.hora_inicio < horario_centro.hora_apertura or self.hora_fin > horario_centro.hora_cierre:
             raise ValidationError(_(
                 "El horario del empleado debe estar dentro del horario del centro. "
