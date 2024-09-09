@@ -54,26 +54,13 @@
         <div class="app-item">
             <h3>Cuentas</h3>
             <div class="button-container">
-                <a href="{% url 'admin:sites_site_changelist' %}" class="button model-button">
-                    <i class="fas fa-globe"></i> Sitios
+                <a href="{% url 'admin:account_emailaddress_changelist' %}" class="button model-button">
+                    <i class="fas fa-globe"></i> Correos Electronicos
                 </a>
             </div>
         </div>
 
-        <div class="app-item">
-            <h3>Cuentas de redes sociales</h3>
-            <div class="button-container">
-                <a href="{% url 'admin:socialaccount_socialapp_changelist' %}" class="button model-button">
-                    <i class="fas fa-share-alt"></i> Aplicaciones de redes sociales
-                </a>
-                <a href="{% url 'admin:socialaccount_socialaccount_changelist' %}" class="button model-button">
-                    <i class="fas fa-users"></i> Cuentas de redes sociales
-                </a>
-                <a href="{% url 'admin:socialaccount_socialtoken_changelist' %}" class="button model-button">
-                    <i class="fas fa-key"></i> Tokens de aplicación de redes sociales
-                </a>
-            </div>
-        </div>
+        
     </div>
 </div>
 {% endblock %}
