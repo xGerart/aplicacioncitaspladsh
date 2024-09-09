@@ -3,6 +3,8 @@ from django.utils.html import format_html
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group
 from .models import Cliente, Servicio, Empleado, Cita, HorarioEmpleado, AusenciaEmpleado, HorarioCentro
+from django import forms
+from django.core.exceptions import ValidationError
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
@@ -72,8 +74,22 @@ class CitaAdmin(admin.ModelAdmin):
         return format_html(icons.get(obj.estado, ''))
     estado_icon.short_description = 'Estado'
 
+class HorarioEmpleadoForm(forms.ModelForm):
+    class Meta:
+        model = HorarioEmpleado
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        try:
+            self.instance.clean()
+        except ValidationError as e:
+            self.add_error(None, e)
+        return cleaned_data
+
 @admin.register(HorarioEmpleado)
 class HorarioEmpleadoAdmin(admin.ModelAdmin):
+    form = HorarioEmpleadoForm
     list_display = ('empleado', 'dia_semana', 'hora_inicio', 'hora_fin', 'disponible_icon')
     list_filter = ('empleado', 'dia_semana', 'disponible')
 

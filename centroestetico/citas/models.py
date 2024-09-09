@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from datetime import datetime
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 class Cliente(models.Model):
     CLIENTE = 'CL'
@@ -127,6 +129,25 @@ class HorarioEmpleado(models.Model):
 
     class Meta:
         unique_together = ['empleado', 'dia_semana', 'hora_inicio', 'hora_fin']
+
+    def clean(self):
+        super().clean()
+        
+        if self.hora_inicio is None or self.hora_fin is None:
+            raise ValidationError(_("Error al guardar horario"))
+
+        # Get the center's schedule for the same day
+        try:
+            horario_centro = HorarioCentro.objects.get(dia=self.dia_semana)
+        except HorarioCentro.DoesNotExist:
+            raise ValidationError(_("No hay un horario definido para el centro en este día."))
+
+        # Check if the employee's schedule is within the center's hours
+        if self.hora_inicio < horario_centro.hora_apertura or self.hora_fin > horario_centro.hora_cierre:
+            raise ValidationError(_(
+                "El horario del empleado debe estar dentro del horario del centro. "
+                f"Horario del centro: {horario_centro.hora_apertura} - {horario_centro.hora_cierre}"
+            ))
 
 class AusenciaEmpleado(models.Model):
     empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name="ausencias")

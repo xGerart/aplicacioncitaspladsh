@@ -19,16 +19,19 @@ body {
   background-color: var(--primary-color);
   color: white;
   box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  padding: 10px 20px;
 }
 
 #branding h1 {
   font-weight: 600;
+  font-size: 1.5rem;
 }
 
 .module h2, .module caption, .inline-group h2 {
   background-color: var(--primary-color);
   color: white;
   font-weight: 600;
+  padding: 10px 15px;
 }
 
 .button, input[type=submit], input[type=button], .submit-row input, a.button {
@@ -39,42 +42,17 @@ body {
   text-transform: uppercase;
   font-weight: 600;
   transition: background-color 0.3s ease;
+  display: inline-block;
+  margin: 5px 0;
 }
 
 .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
   background-color: #3570b3;
 }
 
-.object-tools a {
-  background-color: var(--success-color);
-}
-
-.object-tools a:hover {
-  background-color: #218838;
-}
-
-#changelist-filter h2 {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-#changelist .actions {
-  background: white;
-  border-top: 1px solid #ddd;
-  padding: 15px;
-}
-
-.select2-container--admin-autocomplete .select2-results__option--highlighted[aria-selected] {
-  background-color: var(--primary-color);
-}
-
-.paginator a:link, .paginator a:visited {
-  background: var(--primary-color);
-  color: white;
-}
-
-.dashboard #content {
+#content-main {
   width: 100%;
+  padding: 20px;
 }
 
 .app-list {
@@ -89,26 +67,88 @@ body {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0,0,0,.1);
   padding: 20px;
-  transition: transform 0.3s ease;
-}
-
-.app-item:hover {
-  transform: translateY(-5px);
+  margin-bottom: 20px;
 }
 
 .app-item h3 {
   color: var(--primary-color);
   margin-top: 0;
+  margin-bottom: 15px;
 }
 
-.app-item table {
-  width: 100%;
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.app-item th {
-  text-align: left;
+.model-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.9em;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+  margin-bottom: 10px;
+  width: calc(50% - 5px);
+  text-align: center;
 }
 
-.app-item td {
-  padding: 5px 0;
+.model-button:hover {
+  background-color: #3570b3;
+}
+
+.model-button i {
+  margin-right: 5px;
+}
+
+/* Estilos responsivos */
+@media (max-width: 1024px) {
+  #container {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 767px) {
+  #header {
+    padding: 10px;
+  }
+  
+  #branding h1 {
+    font-size: 1.2rem;
+  }
+  
+  #user-tools {
+    font-size: 0.8rem;
+  }
+  
+  .app-item {
+    flex-basis: 100%;
+  }
+  
+  .model-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  #content-main {
+    padding: 10px;
+  }
+  
+  .app-list {
+    flex-direction: column;
+  }
+  
+  .app-item {
+    padding: 15px;
+  }
+  
+  .model-button {
+    font-size: 0.8em;
+    padding: 10px;
+  }
 }

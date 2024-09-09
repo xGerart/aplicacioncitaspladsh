@@ -1,9 +1,9 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
+{% block extrastyle %}{{ block.super }}{% endblock %}
 
-{% block coltype %}colMS{% endblock %}
+{% block coltype %}colM{% endblock %}
 
 {% block bodyclass %}{{ block.super }} dashboard{% endblock %}
 
@@ -15,64 +15,65 @@
     <p>Desde aquí puedes gestionar todos los aspectos de tu centro estético.</p>
 
     <div class="app-list">
-    {% for app in app_list %}
         <div class="app-item">
-            <h3>
-                <a href="{{ app.app_url }}" class="section" title="{% blocktranslate with name=app.name %}Models in the {{ name }} application{% endblocktranslate %}">{{ app.name }}</a>
-            </h3>
-            <table>
-                {% for model in app.models %}
-                    <tr>
-                        <th scope="row">
-
-                        </th>
-                        <td>
-                            {% if model.add_url %}
-                                <a href="{{ model.add_url }}" class="addlink">{% translate 'Add' %}</a>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if model.admin_url %}
-                                <a href="{{ model.admin_url }}" class="changelink">{% translate 'Change' %}</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
+            <h3>Autenticación y autorización</h3>
+            <div class="button-container">
+                <a href="{% url 'admin:auth_user_changelist' %}" class="button model-button">
+                    <i class="fas fa-users"></i> Usuarios
+                </a>
+            </div>
         </div>
-    {% endfor %}
-    </div>
-</div>
-{% endblock %}
 
-{% block sidebar %}
-<div id="content-related">
-    <div class="module" id="recent-actions-module">
-        <h2>{% translate 'Recent actions' %}</h2>
-        <h3>{% translate 'My actions' %}</h3>
-        {% load log %}
-        {% get_admin_log 10 as admin_log for_user user %}
-        {% if not admin_log %}
-            <p>{% translate 'None available' %}</p>
-        {% else %}
-            <ul class="actionlist">
-            {% for entry in admin_log %}
-                <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
-                    {% if entry.is_deletion or not entry.get_admin_url %}
-                        {{ entry.object_repr }}
-                    {% else %}
-                        <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
-                    {% endif %}
-                    <br>
-                    {% if entry.content_type %}
-                        <span class="mini quiet">{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}</span>
-                    {% else %}
-                        <span class="mini quiet">{% translate 'Unknown content' %}</span>
-                    {% endif %}
-                </li>
-            {% endfor %}
-            </ul>
-        {% endif %}
+        <div class="app-item">
+            <h3>Citas</h3>
+            <div class="button-container">
+                <a href="{% url 'admin:citas_ausenciaempleado_changelist' %}" class="button model-button">
+                    <i class="fas fa-user-times"></i> Ausencia empleados
+                </a>
+                <a href="{% url 'admin:citas_cita_changelist' %}" class="button model-button">
+                    <i class="fas fa-calendar-check"></i> Citas
+                </a>
+                <a href="{% url 'admin:citas_cliente_changelist' %}" class="button model-button">
+                    <i class="fas fa-user-friends"></i> Clientes
+                </a>
+                <a href="{% url 'admin:citas_empleado_changelist' %}" class="button model-button">
+                    <i class="fas fa-user-tie"></i> Empleados
+                </a>
+                <a href="{% url 'admin:citas_horariocentro_changelist' %}" class="button model-button">
+                    <i class="fas fa-clock"></i> Horario centros
+                </a>
+                <a href="{% url 'admin:citas_horarioempleado_changelist' %}" class="button model-button">
+                    <i class="fas fa-calendar-alt"></i> Horario empleados
+                </a>
+                <a href="{% url 'admin:citas_servicio_changelist' %}" class="button model-button">
+                    <i class="fas fa-concierge-bell"></i> Servicios
+                </a>
+            </div>
+        </div>
+
+        <div class="app-item">
+            <h3>Cuentas</h3>
+            <div class="button-container">
+                <a href="{% url 'admin:sites_site_changelist' %}" class="button model-button">
+                    <i class="fas fa-globe"></i> Sitios
+                </a>
+            </div>
+        </div>
+
+        <div class="app-item">
+            <h3>Cuentas de redes sociales</h3>
+            <div class="button-container">
+                <a href="{% url 'admin:socialaccount_socialapp_changelist' %}" class="button model-button">
+                    <i class="fas fa-share-alt"></i> Aplicaciones de redes sociales
+                </a>
+                <a href="{% url 'admin:socialaccount_socialaccount_changelist' %}" class="button model-button">
+                    <i class="fas fa-users"></i> Cuentas de redes sociales
+                </a>
+                <a href="{% url 'admin:socialaccount_socialtoken_changelist' %}" class="button model-button">
+                    <i class="fas fa-key"></i> Tokens de aplicación de redes sociales
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
